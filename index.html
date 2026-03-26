@@ -2,1001 +2,384 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Dashboard — Transporte Nasca Rojim S.R.L.</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Operativo — Transporte Nasca Rojim S.R.L.</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:#0f0f1a;font-family:system-ui,-apple-system,sans-serif;color:#ddd;display:flex;min-height:100vh}
-
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0b1121;--bg2:#0f172a;--bg3:#1e293b;--card:#131c2e;--card-border:#1e293b;--accent:#3b82f6;--accent2:#6366f1;--success:#10b981;--warn:#f59e0b;--danger:#ef4444;--cyan:#06b6d4;--text:#e2e8f0;--muted:#64748b;--muted2:#94a3b8;--border:rgba(255,255,255,0.06)}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
 /* SIDEBAR */
-.sidebar{width:220px;min-width:220px;background:#13131f;border-right:1px solid #1e1e30;display:flex;flex-direction:column;padding:0}
-.logo{padding:18px 16px 14px;border-bottom:1px solid #1e1e30}
-.logo-title{font-size:13px;font-weight:700;color:#fff;line-height:1.4}
-.logo-sub{font-size:10px;color:#555;margin-top:3px}
-.nav-section{font-size:9px;font-weight:700;color:#444;letter-spacing:.12em;text-transform:uppercase;padding:14px 16px 6px}
-.nav-item{display:flex;align-items:center;gap:9px;padding:9px 16px;cursor:pointer;border-left:3px solid transparent;transition:all .15s;font-size:12px;color:#888}
-.nav-item:hover{background:#1a1a2e;color:#ccc}
-.nav-item.active{background:#1a1a30;border-left-color:#7c6fe8;color:#fff}
-.nav-icon{font-size:14px;width:18px;text-align:center}
-.sidebar-footer{margin-top:auto;padding:14px 16px;border-top:1px solid #1e1e30;font-size:10px;color:#444}
-
+.sidebar{width:200px;min-height:100vh;background:var(--bg2);border-right:1px solid var(--border);padding:24px 16px;position:fixed;top:0;left:0;z-index:50;display:flex;flex-direction:column}
+.sidebar-brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.sidebar-brand .icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--success));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+.sidebar-brand h2{font-size:0.82rem;font-weight:700;line-height:1.2}
+.sidebar-brand h2 span{color:var(--success)}
+.sidebar-sub{font-size:0.65rem;color:var(--muted);margin-bottom:24px;padding-left:42px}
+.sidebar-section{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);font-weight:700;margin-bottom:10px;padding-left:4px}
+.sidebar-nav{display:flex;flex-direction:column;gap:2px;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:0.78rem;font-weight:500;color:var(--muted2);transition:all 0.2s;user-select:none}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,0.04)}
+.nav-item.active{color:#fff;background:rgba(59,130,246,0.12)}
+.nav-item .ni{width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px}
+.nav-item.active .ni{background:var(--accent);color:#fff}
+.nav-item:not(.active) .ni{background:var(--bg3);color:var(--muted)}
 /* MAIN */
-.main{flex:1;overflow-y:auto;padding:20px 24px}
-.page{display:none}
-.page.active{display:block}
-
-/* TOPBAR */
-.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
-.page-title{font-size:17px;font-weight:700;color:#fff}
-.page-sub{font-size:11px;color:#555;margin-top:2px}
-.period-badge{background:#1c1c2e;border:0.5px solid #2a2a40;border-radius:20px;padding:5px 14px;font-size:11px;color:#888}
-
-/* KPI GRID */
-.kpi-grid{display:grid;gap:10px;margin-bottom:14px}
-.kpi-6{grid-template-columns:repeat(6,1fr)}
-.kpi-5{grid-template-columns:repeat(5,1fr)}
-.kpi-4{grid-template-columns:repeat(4,1fr)}
-.kpi-3{grid-template-columns:repeat(3,1fr)}
-.kpi-2{grid-template-columns:repeat(2,1fr)}
-.kpi{background:#1a1a2e;border-radius:9px;padding:13px 14px;border:0.5px solid #252540;position:relative;overflow:hidden}
-.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-.kpi.purple::before{background:#7c6fe8}
-.kpi.green::before{background:#4ecf8a}
-.kpi.blue::before{background:#5aabf0}
-.kpi.red::before{background:#e05555}
-.kpi.amber::before{background:#e0a84c}
-.kpi.teal::before{background:#2ecfcf}
-.kpi-lbl{font-size:10px;color:#666;margin-bottom:6px;line-height:1.3}
-.kpi-val{font-size:22px;font-weight:700;color:#fff;margin-bottom:6px}
-.kpi-compare{display:flex;align-items:center;gap:10px;font-size:10px;flex-wrap:wrap}
-.kpi-vs{display:flex;align-items:center;gap:4px}
-.arr-up{color:#4ecf8a}
-.arr-dn{color:#e05555}
-.arr-eq{color:#888}
-.prev-val{color:#555}
-
-/* CHARTS GRIDS */
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px}
-.g12{display:grid;grid-template-columns:1fr 2fr;gap:12px;margin-bottom:12px}
-.g21{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px}
-.card{background:#1a1a2e;border-radius:9px;padding:14px 16px;border:0.5px solid #252540}
-.card-title{font-size:11px;color:#888;margin-bottom:10px;font-weight:500;letter-spacing:.02em}
-.card-title span{float:right;font-size:10px;color:#555}
-.leg{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:10px;color:#888}
-.leg span{display:flex;align-items:center;gap:5px}
-.dot{width:8px;height:8px;border-radius:2px;display:inline-block;flex-shrink:0}
-
-/* BAR ROWS */
-.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
-.bar-lbl{width:140px;color:#aaa;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}
-.bar-bg{flex:1;height:13px;background:#252545;border-radius:3px;overflow:hidden}
-.bar-fill{height:100%;border-radius:3px}
-.bar-val{width:70px;text-align:right;color:#ccc;font-size:10px;flex-shrink:0}
-
-/* TABLE */
-table{width:100%;border-collapse:collapse;font-size:11px}
-th{text-align:left;padding:7px 10px;color:#666;font-weight:600;font-size:10px;border-bottom:1px solid #252540;background:#13131f;letter-spacing:.04em}
-td{padding:7px 10px;color:#bbb;border-bottom:0.5px solid #1e1e30}
-tr:hover td{background:#1c1c2e}
-.tbl-wrap{overflow-x:auto;border-radius:7px;border:0.5px solid #252540}
-
-/* PILLS */
-.pill{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;display:inline-block}
-.pg{background:#1a3020;color:#4ecf8a}
-.pr{background:#301a1a;color:#e05555}
-.pb{background:#1a2030;color:#5aabf0}
-.py{background:#302a1a;color:#e0a84c}
-.pp{background:#20183a;color:#a89fef}
-
-/* STAT ROW */
-.srow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid #1e1e30;font-size:11px;color:#bbb}
-.srow:last-child{border-bottom:none}
-
-/* FLEET CARDS */
-.fleet{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
-.fcard{background:#252540;border-radius:8px;padding:12px;text-align:center}
-.fval{font-size:26px;font-weight:700}
-.flbl{font-size:10px;color:#555;margin-top:3px}
-
-/* MONTH TABS */
-.mtabs{display:flex;gap:6px;margin-bottom:12px}
-.mtab{padding:5px 14px;border-radius:20px;font-size:11px;cursor:pointer;border:0.5px solid #252540;color:#666;background:#1a1a2e;transition:all .15s}
-.mtab.active,.mtab:hover{background:#7c6fe8;color:#fff;border-color:#7c6fe8}
-
-/* DIVIDER */
-.sec-div{font-size:10px;font-weight:700;color:#555;letter-spacing:.1em;text-transform:uppercase;margin:16px 0 8px;padding-bottom:6px;border-bottom:0.5px solid #1e1e30}
-
-/* PROGRESS */
-.prog-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.prog-lbl{width:110px;font-size:10px;color:#aaa;flex-shrink:0}
-.prog-bg{flex:1;height:10px;background:#252545;border-radius:5px;overflow:hidden}
-.prog-fill{height:100%;border-radius:5px}
-.prog-pct{width:38px;text-align:right;font-size:10px;color:#ccc;flex-shrink:0}
-
-/* INCIDENT CARD */
-.inc-card{background:#252540;border-radius:7px;padding:10px 12px;margin-bottom:8px;border-left:3px solid #e05555}
-.inc-card.alta{border-left-color:#e05555}
-.inc-card.media{border-left-color:#e0a84c}
-.inc-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
-.inc-id{font-size:10px;color:#7c6fe8;font-weight:600}
-.inc-tipo{font-size:11px;font-weight:600;color:#ddd}
-.inc-desc{font-size:10px;color:#777;line-height:1.4}
-.inc-meta{display:flex;gap:8px;margin-top:5px;flex-wrap:wrap}
-.inc-tag{font-size:9px;background:#1a1a2e;border:0.5px solid #2a2a40;border-radius:4px;padding:2px 6px;color:#888}
-
-footer{font-size:10px;color:#333;text-align:center;margin-top:20px;padding-top:12px;border-top:0.5px solid #1e1e30}
+.main{margin-left:200px;flex:1;min-height:100vh}
+.main-header{padding:20px 28px;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--border)}
+.main-header h1{font-size:1.3rem;font-weight:700}
+.main-header p{font-size:0.75rem;color:var(--muted);margin-top:2px}
+.period-badge{font-family:'Space Mono',monospace;font-size:0.72rem;background:var(--bg3);border:1px solid var(--border);padding:8px 16px;border-radius:8px;color:var(--muted2);white-space:nowrap}
+.filters{padding:12px 28px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+.filters .lbl{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;font-weight:600;margin-right:4px}
+.fbtn{padding:6px 16px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted2);font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:500;cursor:pointer;transition:all 0.2s}
+.fbtn:hover{border-color:rgba(59,130,246,0.3);color:var(--text)}
+.fbtn.active{background:rgba(59,130,246,0.1);border-color:var(--accent);color:var(--accent)}
+.fsep{width:1px;height:24px;background:var(--border);margin:0 6px}
+.fdate{padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.75rem;outline:none;transition:all 0.2s}
+.fdate:focus{border-color:var(--accent)}
+/* CONTENT */
+.content{padding:24px 28px}
+.section{display:none;animation:fadeUp 0.35s ease}.section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+/* KPI ROW */
+.kpi-row{display:grid;gap:14px;margin-bottom:20px}
+.kpi-row.cols3{grid-template-columns:repeat(3,1fr)}
+.kpi-row.cols6{grid-template-columns:repeat(3,1fr)}
+.kpi-row.cols5{grid-template-columns:repeat(5,1fr)}
+.kc{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden}
+.kc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kc.blue::after{background:var(--accent)}.kc.green::after{background:var(--success)}.kc.red::after{background:var(--danger)}.kc.orange::after{background:var(--warn)}.kc.purple::after{background:var(--accent2)}.kc.cyan::after{background:var(--cyan)}.kc.teal::after{background:#14b8a6}
+.kc-label{font-size:0.68rem;color:var(--muted);font-weight:500;margin-bottom:8px}
+.kc-value{font-family:'Space Mono',monospace;font-size:1.8rem;font-weight:700;line-height:1}
+.kc.blue .kc-value{color:var(--accent)}.kc.green .kc-value{color:var(--success)}.kc.red .kc-value{color:var(--danger)}.kc.orange .kc-value{color:var(--warn)}.kc.purple .kc-value{color:var(--accent2)}.kc.cyan .kc-value{color:var(--cyan)}.kc.teal .kc-value{color:#14b8a6}
+.kc-sub{font-size:0.68rem;color:var(--muted);margin-top:8px;line-height:1.4}
+.kc-sub b{font-weight:600}
+.kc-sub .g{color:var(--success)}.kc-sub .r{color:var(--danger)}.kc-sub .y{color:var(--warn)}.kc-sub .b{color:var(--accent)}
+/* CHART GRID */
+.cg{display:grid;gap:14px;margin-bottom:20px}
+.cg.c2{grid-template-columns:1fr 1fr}
+.cg.c21{grid-template-columns:2fr 1fr}
+.cg.c12{grid-template-columns:1fr 2fr}
+.cg.c1{grid-template-columns:1fr}
+.cp{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:18px 20px;overflow:hidden}
+.cp h3{font-size:0.8rem;font-weight:600;margin-bottom:14px;color:var(--text)}
+.cwrap{position:relative;height:280px}
+.cwrap.tall{height:380px}
+.cwrap.short{height:240px}
+/* TABLES */
+.tp{background:var(--card);border:1px solid var(--card-border);border-radius:12px;padding:18px 20px;margin-bottom:20px;overflow:hidden}
+.tp h3{font-size:0.8rem;font-weight:600;margin-bottom:12px}
+.tp .tw{overflow-x:auto;max-height:400px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:0.75rem}
+thead th{background:var(--bg3);color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.04em;font-size:0.65rem;padding:9px 12px;text-align:left;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
+tbody td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--muted2);white-space:nowrap}
+tbody tr:hover td{background:rgba(59,130,246,0.04);color:var(--text)}
+.pill{display:inline-block;padding:2px 10px;border-radius:20px;font-size:0.65rem;font-weight:600}
+.pill-green{background:rgba(16,185,129,0.15);color:#34d399}.pill-red{background:rgba(239,68,68,0.15);color:#f87171}.pill-yellow{background:rgba(245,158,11,0.15);color:#fbbf24}.pill-blue{background:rgba(59,130,246,0.15);color:#60a5fa}.pill-purple{background:rgba(99,102,241,0.15);color:#a78bfa}
+.mono{font-family:'Space Mono',monospace}
+/* SEMAFORO */
+.sem-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.sem-card{background:var(--bg3);border-radius:10px;padding:16px;border:1px solid var(--border)}
+.sem-card h4{font-weight:700;margin-bottom:10px;font-size:0.85rem}
+.sem-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:0.75rem;font-weight:600}
+.sem-dot{width:10px;height:10px;border-radius:50%;box-shadow:0 0 6px currentColor}
+.sem-green{color:#34d399}.sem-yellow{color:#fbbf24}.sem-red{color:#f87171}
+.pbar{width:100%;height:6px;border-radius:3px;background:var(--bg);overflow:hidden;margin-bottom:8px}
+.pbar-fill{height:100%;border-radius:3px}
+.footer{text-align:center;padding:20px 28px;color:var(--muted);font-size:0.7rem;border-top:1px solid var(--border)}
+@media(max-width:1000px){.sidebar{width:60px;padding:12px 6px}.sidebar-brand h2,.sidebar-sub,.sidebar-section,.nav-item span:not(.ni){display:none}.main{margin-left:60px}.kpi-row.cols3,.kpi-row.cols6,.kpi-row.cols5{grid-template-columns:repeat(2,1fr)}.cg.c2,.cg.c21,.cg.c12{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
 <!-- SIDEBAR -->
-<div class="sidebar">
-  <div class="logo">
-    <div class="logo-title">🚛 Transporte Nasca<br>Rojim S.R.L.</div>
-    <div class="logo-sub">Panel Operativo 2026</div>
+<aside class="sidebar">
+  <div class="sidebar-brand"><div class="icon">TR</div><h2>Transporte Nasca<br><span>Rojim S.R.L.</span></h2></div>
+  <div class="sidebar-sub">Panel Operativo 2026</div>
+  <div class="sidebar-section">GESTIÓN</div>
+  <div class="sidebar-nav" id="sideNav">
+    <div class="nav-item active" data-tab="general"><span class="ni">📊</span><span>General</span></div>
+    <div class="nav-item" data-tab="programacion"><span class="ni">📋</span><span>Programaciones</span></div>
+    <div class="nav-item" data-tab="costos"><span class="ni">💰</span><span>Costo / Facturación</span></div>
+    <div class="nav-item" data-tab="incidentes"><span class="ni">⚠️</span><span>Incidentes</span></div>
+    <div class="nav-item" data-tab="operaciones"><span class="ni">📄</span><span>Continuidad Operativa</span></div>
   </div>
-  <div class="nav-section">Gestión</div>
-  <div class="nav-item active" onclick="showPage('general')">
-    <span class="nav-icon">📊</span> General
-  </div>
-  <div class="nav-item" onclick="showPage('programacion')">
-    <span class="nav-icon">📅</span> Programaciones
-  </div>
-  <div class="nav-item" onclick="showPage('costos')">
-    <span class="nav-icon">💰</span> Costo / Facturación
-  </div>
-  <div class="nav-item" onclick="showPage('incidentes')">
-    <span class="nav-icon">⚠️</span> Incidentes
-  </div>
-  <div class="nav-item" onclick="showPage('continuidad')">
-    <span class="nav-icon">🔄</span> Continuidad Operativa
-  </div>
-  <div class="sidebar-footer">Ene – Mar 2026 &nbsp;|&nbsp; 232 viajes</div>
-</div>
+</aside>
 
-<!-- MAIN CONTENT -->
+<!-- MAIN -->
 <div class="main">
+<div class="main-header">
+  <div><h1 id="pageTitle">Resumen General</h1><p id="pageDesc">Indicadores globales con comparativo mensual</p></div>
+  <div class="period-badge" id="periodBadge">Enero — Marzo 2026</div>
+</div>
+<div class="filters">
+  <span class="lbl">Mes:</span>
+  <button class="fbtn active" onclick="setM('Todos',this)">Todos</button>
+  <button class="fbtn" onclick="setM('Ene',this)">Enero</button>
+  <button class="fbtn" onclick="setM('Feb',this)">Febrero</button>
+  <button class="fbtn" onclick="setM('Mar',this)">Marzo</button>
+  <div class="fsep"></div>
+  <span class="lbl">Día:</span>
+  <input type="date" class="fdate" id="dF" min="2026-01-13" max="2026-03-25" onchange="setD(this.value)">
+  <button class="fbtn" onclick="clearD()" style="padding:6px 10px">✕</button>
+</div>
 
-<!-- ========== GENERAL ========== -->
-<div class="page active" id="page-general">
-  <div class="topbar">
-    <div>
-      <div class="page-title">Resumen General</div>
-      <div class="page-sub">Indicadores globales con comparativo mensual</div>
-    </div>
-    <div class="period-badge">Enero – Marzo 2026</div>
+<div class="content">
+
+<!-- GENERAL -->
+<div id="sec-general" class="section active">
+  <div class="kpi-row cols3" id="kG1"></div>
+  <div class="kpi-row cols3" id="kG2"></div>
+  <div class="cg c2">
+    <div class="cp"><h3>Viajes por Mes — Estado de Entrega</h3><div class="cwrap"><canvas id="gC1"></canvas></div></div>
+    <div class="cp"><h3>Distribución Global de Entregas</h3><div class="cwrap"><canvas id="gC2"></canvas></div></div>
   </div>
-
-  <!-- KPIs con comparativo -->
-  <div class="kpi-grid kpi-3">
-    <div class="kpi purple">
-      <div class="kpi-lbl">Monto Facturado</div>
-      <div class="kpi-val" style="font-size:20px">S/ 1,394,326</div>
-      <div class="kpi-compare">
-        <div class="kpi-vs"><span class="arr-up">▲</span><b style="color:#4ecf8a">+54.8%</b></div>
-        <span class="prev-val">Feb S/847K → Mar S/547K</span>
-      </div>
-    </div>
-    <div class="kpi blue">
-      <div class="kpi-lbl">Total Viajes Registrados</div>
-      <div class="kpi-val">232</div>
-      <div class="kpi-compare">
-        <div class="kpi-vs"><span class="arr-up">▲</span><b style="color:#4ecf8a">Ene 65</b></div>
-        <div class="kpi-vs"><span style="color:#5aabf0">■</span><b style="color:#5aabf0">Feb 95</b></div>
-        <div class="kpi-vs"><span class="arr-dn">▼</span><b style="color:#e0a84c">Mar 72</b></div>
-      </div>
-    </div>
-    <div class="kpi teal">
-      <div class="kpi-lbl">Tiempo Promedio por Viaje</div>
-      <div class="kpi-val">23.7 h</div>
-      <div class="kpi-compare">
-        <div class="kpi-vs"><span style="color:#888">Ene</span><b style="color:#ccc;margin-left:3px">22.1h</b></div>
-        <div class="kpi-vs"><span style="color:#888">Feb</span><b style="color:#ccc;margin-left:3px">26.8h</b></div>
-        <div class="kpi-vs"><span style="color:#888">Mar</span><b style="color:#ccc;margin-left:3px">20.6h</b></div>
-      </div>
-    </div>
+  <div class="cg c2">
+    <div class="cp"><h3>Tiempo Promedio por Viaje — Comparativo Mensual (hrs)</h3><div class="cwrap"><canvas id="gC3"></canvas></div></div>
+    <div class="cp"><h3>Viajes por Cliente</h3><div class="cwrap"><canvas id="gC4"></canvas></div></div>
   </div>
-
-  <div class="kpi-grid kpi-3">
-    <div class="kpi green">
-      <div class="kpi-lbl">Entregas a Tiempo (OTIF)</div>
-      <div class="kpi-val" style="color:#4ecf8a">71.9%</div>
-      <div class="kpi-compare">
-        <div class="kpi-vs"><span style="color:#888">Ene</span><b style="color:#4ecf8a;margin-left:3px">76.9%</b></div>
-        <div class="kpi-vs"><span style="color:#888">Feb</span><b style="color:#4ecf8a;margin-left:3px">74.7%</b></div>
-        <div class="kpi-vs"><span style="color:#888">Mar</span><b style="color:#e0a84c;margin-left:3px">63.9%</b></div>
-      </div>
-    </div>
-    <div class="kpi blue">
-      <div class="kpi-lbl">Entregas Anticipadas</div>
-      <div class="kpi-val" style="color:#5aabf0">19.0%</div>
-      <div class="kpi-compare">
-        <div class="kpi-vs"><span style="color:#888">Ene</span><b style="color:#5aabf0;margin-left:3px">20.0%</b></div>
-        <div class="kpi-vs"><span style="color:#888">Feb</span><b style="color:#5aabf0;margin-left:3px">16.8%</b></div>
-        <div class="kpi-vs"><span style="color:#888">Mar</span><b style="color:#5aabf0;margin-left:3px">20.8%</b></div>
-      </div>
-    </div>
-    <div class="kpi red">
-      <div class="kpi-lbl">Entregas Retrasadas</div>
-      <div class="kpi-val" style="color:#e05555">4.3%</div>
-      <div class="kpi-compare">
-        <div class="kpi-vs"><span style="color:#888">Ene</span><b style="color:#4ecf8a;margin-left:3px">3.1%</b></div>
-        <div class="kpi-vs"><span style="color:#888">Feb</span><b style="color:#e05555;margin-left:3px">8.4%</b></div>
-        <div class="kpi-vs"><span style="color:#888">Mar</span><b style="color:#4ecf8a;margin-left:3px">0.0%</b></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="g2">
-    <div class="card">
-      <div class="card-title">Viajes por Mes — Estado de Entrega</div>
-      <div class="leg">
-        <span><span class="dot" style="background:#4ecf8a"></span>A Tiempo</span>
-        <span><span class="dot" style="background:#5aabf0"></span>Anticipado</span>
-        <span><span class="dot" style="background:#e05555"></span>Retrasado</span>
-      </div>
-      <div style="position:relative;height:180px"><canvas id="g-viajes"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Distribución Global de Entregas</div>
-      <div class="leg">
-        <span><span class="dot" style="background:#4ecf8a"></span>A Tiempo 71.9% (167)</span>
-        <span><span class="dot" style="background:#5aabf0"></span>Anticipado 19.0% (44)</span>
-        <span><span class="dot" style="background:#e05555"></span>Retrasado 4.3% (10)</span>
-      </div>
-      <div style="position:relative;height:180px"><canvas id="g-donut"></canvas></div>
-    </div>
-  </div>
-
-  <div class="g2">
-    <div class="card">
-      <div class="card-title">Tiempo Promedio por Viaje — Comparativo Mensual (hrs)</div>
-      <div style="position:relative;height:160px"><canvas id="g-tiempo"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Viajes por Cliente</div>
-      <div style="margin-top:4px">
-        <div class="bar-row">
-          <div class="bar-lbl">Consur Nasca</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:100%;background:#5aabf0"></div></div>
-          <div class="bar-val">110 viajes</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Consorcio Goldmac</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:79%;background:#7c6fe8"></div></div>
-          <div class="bar-val">87 viajes</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">UNACEM</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:12%;background:#4ecf8a"></div></div>
-          <div class="bar-val">13 viajes</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Consur Arequipa</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:8%;background:#e0a84c"></div></div>
-          <div class="bar-val">9 viajes</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Consur Abancay</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:6%;background:#e0a84c"></div></div>
-          <div class="bar-val">7 viajes</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Consur Trujillo</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:5%;background:#e0a84c"></div></div>
-          <div class="bar-val">6 viajes</div>
-        </div>
-      </div>
-    </div>
+  <div class="cg c2">
+    <div class="cp"><h3>OTIF% por Mes — On Time & In Full</h3><div class="cwrap"><canvas id="gC5"></canvas></div></div>
+    <div class="cp"><h3>Tipos de Demora</h3><div class="cwrap"><canvas id="gC6"></canvas></div></div>
   </div>
 </div>
 
-<!-- ========== PROGRAMACIONES ========== -->
-<div class="page" id="page-programacion">
-  <div class="topbar">
-    <div>
-      <div class="page-title">Programaciones</div>
-      <div class="page-sub">Ejecución, conductores y tiempos por ruta</div>
-    </div>
-    <div class="period-badge">Enero – Marzo 2026</div>
+<!-- PROGRAMACIONES -->
+<div id="sec-programacion" class="section">
+  <div class="kpi-row cols5" id="kP"></div>
+  <div class="cg c2">
+    <div class="cp"><h3>Programaciones por Mes</h3><div class="cwrap"><canvas id="pC1"></canvas></div></div>
+    <div class="cp"><h3>Estado de Ejecución</h3><div class="cwrap"><canvas id="pC2"></canvas></div></div>
   </div>
+  <div class="tp"><h3>Viajes Pendientes de Ejecución <span id="pendN" style="color:var(--warn);font-size:0.72rem;margin-left:8px"></span></h3><div class="tw"><table><thead><tr><th>Conductor</th><th>Tracto</th><th>Cliente</th><th>Origen</th><th>Destino</th><th>F. Salida</th><th>ID</th><th>Estado</th></tr></thead><tbody id="pTB"></tbody></table></div></div>
+</div>
 
-  <div class="kpi-grid kpi-4">
-    <div class="kpi blue">
-      <div class="kpi-lbl">Total Programados</div>
-      <div class="kpi-val">198</div>
-      <div class="kpi-compare"><span class="prev-val">Ene 28 · Feb 95 · Mar 75</span></div>
-    </div>
-    <div class="kpi green">
-      <div class="kpi-lbl">Ejecutados</div>
-      <div class="kpi-val" style="color:#4ecf8a">195</div>
-      <div class="kpi-compare"><span class="arr-up">▲</span><b style="color:#4ecf8a;margin-left:4px">98.5%</b></div>
-    </div>
-    <div class="kpi red">
-      <div class="kpi-lbl">No Ejecutados</div>
-      <div class="kpi-val" style="color:#e05555">3</div>
-      <div class="kpi-compare"><span class="arr-dn">▼</span><b style="color:#e05555;margin-left:4px">1.5%</b></div>
-    </div>
-    <div class="kpi purple">
-      <div class="kpi-lbl">% de Ejecución Global</div>
-      <div class="kpi-val" style="color:#a89fef">98.5%</div>
-      <div class="kpi-compare"><span class="prev-val">Ene 100% · Feb 100% · Mar 96%</span></div>
-    </div>
+<!-- COSTOS -->
+<div id="sec-costos" class="section">
+  <div class="kpi-row cols5" id="kCo"></div>
+  <div class="cg c2">
+    <div class="cp"><h3>Costo Facturado por Mes (S/.)</h3><div class="cwrap"><canvas id="coC1"></canvas></div></div>
+    <div class="cp"><h3>Costo por Cliente (S/.)</h3><div class="cwrap"><canvas id="coC2"></canvas></div></div>
   </div>
-
-  <div class="g2">
-    <div class="card">
-      <div class="card-title">Ejecución Mensual — Programado vs Ejecutado</div>
-      <div class="leg">
-        <span><span class="dot" style="background:#7c6fe8"></span>Programados</span>
-        <span><span class="dot" style="background:#4ecf8a"></span>Ejecutados</span>
-        <span><span class="dot" style="background:#e05555"></span>No Ejecutados</span>
-      </div>
-      <div style="position:relative;height:180px"><canvas id="p-ejec"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="card-title">% de Ejecución por Mes</div>
-      <div style="margin-top:8px">
-        <div class="prog-row">
-          <div class="prog-lbl">Enero 2026</div>
-          <div class="prog-bg"><div class="prog-fill" style="width:100%;background:#4ecf8a"></div></div>
-          <div class="prog-pct">100%</div>
-        </div>
-        <div class="prog-row">
-          <div class="prog-lbl">Febrero 2026</div>
-          <div class="prog-bg"><div class="prog-fill" style="width:100%;background:#4ecf8a"></div></div>
-          <div class="prog-pct">100%</div>
-        </div>
-        <div class="prog-row">
-          <div class="prog-lbl">Marzo 2026</div>
-          <div class="prog-bg"><div class="prog-fill" style="width:96%;background:#e0a84c"></div></div>
-          <div class="prog-pct">96.0%</div>
-        </div>
-        <div style="margin-top:14px" class="sec-div">Detalle No Ejecutados</div>
-        <div class="srow"><span>Marzo 2026</span><span class="pill pr">3 viajes</span></div>
-        <div class="srow"><span>Estado actual</span><span class="pill py">PROGRAMADO</span></div>
-        <div class="srow"><span>Enero / Febrero</span><span class="pill pg">Sin pendientes</span></div>
-      </div>
-    </div>
+  <div class="cg c1">
+    <div class="cp"><h3>Costo Facturado por Unidad / Tracto (S/.)</h3><div class="cwrap tall"><canvas id="coC3"></canvas></div></div>
   </div>
-
-  <div class="g2">
-    <div class="card">
-      <div class="card-title">Top 10 Conductores por Viajes <span>% A Tiempo incluido</span></div>
-      <div style="margin-top:4px">
-        <div class="bar-row">
-          <div class="bar-lbl">E. Lara Bernales</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:100%;background:#7c6fe8"></div></div>
-          <div class="bar-val">17 · 82.4%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">C. Ripas Guillen</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:94%;background:#7c6fe8"></div></div>
-          <div class="bar-val">16 · 81.2%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">H. Uribe Casma</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:94%;background:#7c6fe8"></div></div>
-          <div class="bar-val">16 · 81.2%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">W. Chipana Vasquez</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:88%;background:#5aabf0"></div></div>
-          <div class="bar-val">15 · 80.0%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">D. Vasquez Gabriel</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:82%;background:#5aabf0"></div></div>
-          <div class="bar-val">14 · 71.4%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">D. Lopez Gutierrez</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:82%;background:#5aabf0"></div></div>
-          <div class="bar-val">14 · 64.3%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">E. Tapia Quispe</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:76%;background:#4ecf8a"></div></div>
-          <div class="bar-val">13 · 61.5%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">M. Tipian Huarca</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:76%;background:#4ecf8a"></div></div>
-          <div class="bar-val">13 · 53.8%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">J. Velarde Cardenas</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#4ecf8a"></div></div>
-          <div class="bar-val">12 · 75.0%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">J. Perez Bautista</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:70%;background:#4ecf8a"></div></div>
-          <div class="bar-val">12 · 75.0%</div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Tiempo Promedio por Ruta (horas) + % A Tiempo</div>
-      <div style="margin-top:4px">
-        <div class="bar-row">
-          <div class="bar-lbl">Cuzco → Nazca</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:100%;background:#e05555"></div></div>
-          <div class="bar-val">34.8h · 49%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Lima → Abancay</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:79%;background:#4ecf8a"></div></div>
-          <div class="bar-val">27.6h · 100%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Abancay → Nazca</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:57%;background:#4ecf8a"></div></div>
-          <div class="bar-val">20.0h · 100%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Arequipa → Nazca</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:52%;background:#4ecf8a"></div></div>
-          <div class="bar-val">18.0h · 100%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Trujillo → Lima</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:49%;background:#4ecf8a"></div></div>
-          <div class="bar-val">17.0h · 100%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Nazca → Lima</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:47%;background:#5aabf0"></div></div>
-          <div class="bar-val">16.4h · 81%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Lima → Nazca / Ica</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:27%;background:#4ecf8a"></div></div>
-          <div class="bar-val">9.1h · 100%</div>
-        </div>
-      </div>
-      <div style="margin-top:14px" class="sec-div">Ruta con mayor retraso</div>
-      <div class="srow"><span>Cuzco → Nazca</span><span class="pill pr">50.6% retrasado/anticipado</span></div>
-      <div class="srow"><span>Nazca → Lima</span><span class="pill py">19.1% no a tiempo</span></div>
-      <div class="srow"><span>Resto de rutas</span><span class="pill pg">100% a tiempo</span></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Tabla de Conductores — Detalle Completo</div>
-    <div class="tbl-wrap" style="margin-top:8px">
-      <table>
-        <thead><tr><th>#</th><th>Conductor</th><th>Viajes</th><th>A Tiempo</th><th>Anticipado</th><th>Retrasado</th><th>% Puntualidad</th><th>T. Promedio</th></tr></thead>
-        <tbody>
-          <tr><td>1</td><td>Lara Bernales, Erick</td><td>17</td><td>14</td><td>2</td><td>1</td><td><span class="pill pg">82.4%</span></td><td>19.4h</td></tr>
-          <tr><td>2</td><td>Ripas Guillen, Cesar</td><td>16</td><td>13</td><td>1</td><td>2</td><td><span class="pill pg">81.2%</span></td><td>18.2h</td></tr>
-          <tr><td>3</td><td>Uribe Casma, Heiner</td><td>16</td><td>13</td><td>3</td><td>0</td><td><span class="pill pg">81.2%</span></td><td>20.5h</td></tr>
-          <tr><td>4</td><td>Chipana Vasquez, Willy</td><td>15</td><td>12</td><td>3</td><td>0</td><td><span class="pill pg">80.0%</span></td><td>22.8h</td></tr>
-          <tr><td>5</td><td>Vasquez Gabriel, Dennis</td><td>14</td><td>10</td><td>4</td><td>0</td><td><span class="pill py">71.4%</span></td><td>23.1h</td></tr>
-          <tr><td>6</td><td>Lopez Gutierrez, Danny</td><td>14</td><td>9</td><td>4</td><td>1</td><td><span class="pill py">64.3%</span></td><td>25.1h</td></tr>
-          <tr><td>7</td><td>Tapia Quispe, Elias</td><td>13</td><td>8</td><td>4</td><td>1</td><td><span class="pill py">61.5%</span></td><td>26.1h</td></tr>
-          <tr><td>8</td><td>Tipian Huarca, Marco</td><td>13</td><td>7</td><td>6</td><td>0</td><td><span class="pill pr">53.8%</span></td><td>26.5h</td></tr>
-          <tr><td>9</td><td>Velarde Cardenas, Jose</td><td>12</td><td>9</td><td>2</td><td>1</td><td><span class="pill pg">75.0%</span></td><td>24.5h</td></tr>
-          <tr><td>10</td><td>Perez Bautista, Javier</td><td>12</td><td>9</td><td>2</td><td>1</td><td><span class="pill pg">75.0%</span></td><td>20.3h</td></tr>
-        </tbody>
-      </table>
-    </div>
+  <div class="cg c2">
+    <div class="cp"><h3>Estado de Viajes Facturados</h3><div class="cwrap short"><canvas id="coC4"></canvas></div></div>
+    <div class="cp"><h3>Traslados Internos por Mes (S/.)</h3><div class="cwrap short"><canvas id="coC5"></canvas></div></div>
   </div>
 </div>
 
-<!-- ========== COSTOS ========== -->
-<div class="page" id="page-costos">
-  <div class="topbar">
-    <div>
-      <div class="page-title">Costo y Facturación</div>
-      <div class="page-sub">Análisis financiero de viajes y traslados internos</div>
-    </div>
-    <div class="period-badge">Febrero – Marzo 2026</div>
+<!-- INCIDENTES -->
+<div id="sec-incidentes" class="section">
+  <div class="kpi-row cols3" id="kI" style="grid-template-columns:repeat(4,1fr)"></div>
+  <div class="cg c2">
+    <div class="cp"><h3>Incidentes por Tipo</h3><div class="cwrap"><canvas id="iC1"></canvas></div></div>
+    <div class="cp"><h3>Incidentes por Mes</h3><div class="cwrap"><canvas id="iC2"></canvas></div></div>
   </div>
-
-  <div class="kpi-grid kpi-3">
-    <div class="kpi purple">
-      <div class="kpi-lbl">Total Facturado (Viajes Externos)</div>
-      <div class="kpi-val" style="font-size:18px">S/ 1,394,326</div>
-      <div class="kpi-compare">
-        <div class="kpi-vs"><span style="color:#888">Feb</span><b style="color:#4ecf8a;margin-left:3px">S/ 847,089</b></div>
-        <div class="kpi-vs"><span style="color:#888">Mar</span><b style="color:#e0a84c;margin-left:3px">S/ 547,238</b></div>
-      </div>
-    </div>
-    <div class="kpi teal">
-      <div class="kpi-lbl">Traslados Internos</div>
-      <div class="kpi-val" style="font-size:18px">S/ 114,750</div>
-      <div class="kpi-compare">
-        <div class="kpi-vs"><span style="color:#888">Feb</span><b style="color:#ccc;margin-left:3px">S/ 10,900</b></div>
-        <div class="kpi-vs"><span style="color:#888">Mar</span><b style="color:#ccc;margin-left:3px">S/ 103,850</b></div>
-      </div>
-    </div>
-    <div class="kpi blue">
-      <div class="kpi-lbl">Facturación Total Consolidada</div>
-      <div class="kpi-val" style="font-size:18px">S/ 1,509,076</div>
-      <div class="kpi-compare">
-        <div class="kpi-vs"><span style="color:#888">167</span><b style="color:#5aabf0;margin-left:3px">viajes facturados</b></div>
-        <div class="kpi-vs"><span style="color:#888">44</span><b style="color:#5aabf0;margin-left:3px">traslados</b></div>
-      </div>
-    </div>
+  <div class="cg c2">
+    <div class="cp"><h3>Por Unidad</h3><div class="cwrap"><canvas id="iC3"></canvas></div></div>
+    <div class="cp"><h3>Severidad</h3><div class="cwrap"><canvas id="iC4"></canvas></div></div>
   </div>
-
-  <div class="kpi-grid kpi-3">
-    <div class="kpi green">
-      <div class="kpi-lbl">Viajes Completados (Descargado)</div>
-      <div class="kpi-val" style="color:#4ecf8a">221</div>
-      <div class="kpi-compare"><span class="prev-val">95.3% del total registrado</span></div>
-    </div>
-    <div class="kpi amber">
-      <div class="kpi-lbl">En Ruta Actualmente</div>
-      <div class="kpi-val" style="color:#e0a84c">11</div>
-      <div class="kpi-compare"><span class="prev-val">Todos en Marzo 2026</span></div>
-    </div>
-    <div class="kpi red">
-      <div class="kpi-lbl">Costo Promedio por Tonelada</div>
-      <div class="kpi-val" style="font-size:18px">S/ 220.15</div>
-      <div class="kpi-compare">
-        <div class="kpi-vs"><span style="color:#888">Feb</span><b style="color:#e05555;margin-left:3px">S/ 237.24</b></div>
-        <div class="kpi-vs"><span style="color:#888">Mar</span><b style="color:#4ecf8a;margin-left:3px">S/ 208.21</b></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Tabla por mes + costo producción por unidad -->
-  <div class="g2">
-    <div class="card">
-      <div class="card-title">Tabla: Costo y Producción por Mes</div>
-      <div class="tbl-wrap" style="margin-top:8px">
-        <table>
-          <thead><tr><th>Mes</th><th>Viajes</th><th>Carga (TN)</th><th>Facturado (S/.)</th><th>Costo/TN (S/.)</th><th>Var.</th></tr></thead>
-          <tbody>
-            <tr><td>Feb 2026</td><td>95</td><td>4,293.43</td><td>847,089</td><td><b style="color:#e05555">237.24</b></td><td>—</td></tr>
-            <tr><td>Mar 2026</td><td>72</td><td>3,387.70</td><td>547,238</td><td><b style="color:#4ecf8a">208.21</b></td><td><span class="pill pg">▼ 12.2%</span></td></tr>
-            <tr style="background:#1c1c38"><td><b>Total</b></td><td><b>167</b></td><td><b>7,681.13</b></td><td><b>1,394,327</b></td><td><b>220.15</b></td><td>—</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div style="margin-top:14px" class="sec-div">Traslados Internos por Mes</div>
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th>Mes</th><th>Cantidad</th><th>Total (S/.)</th><th>Promedio/traslado</th></tr></thead>
-          <tbody>
-            <tr><td>Feb 2026</td><td>32</td><td>10,900</td><td>340.6</td></tr>
-            <tr><td>Mar 2026</td><td>12</td><td>103,850</td><td>8,654.2</td></tr>
-            <tr style="background:#1c1c38"><td><b>Total</b></td><td><b>44</b></td><td><b>114,750</b></td><td>—</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Facturación Mensual Comparativa (S/.)</div>
-      <div class="leg">
-        <span><span class="dot" style="background:#7c6fe8"></span>Viajes externos</span>
-        <span><span class="dot" style="background:#4ecf8a"></span>Traslados internos</span>
-      </div>
-      <div style="position:relative;height:190px"><canvas id="c-mensual"></canvas></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Facturación por Cliente — Detalle Completo</div>
-    <div class="tbl-wrap" style="margin-top:8px">
-      <table>
-        <thead><tr><th>Cliente</th><th>Viajes</th><th>Carga Transp. (TN)</th><th>Monto Facturado (S/.)</th><th>% del Total</th><th>Precio Prom/TN</th></tr></thead>
-        <tbody>
-          <tr><td>Consorcio Goldmac</td><td>68</td><td>2,624.25</td><td>892,955</td><td><span class="pill pp">64.1%</span></td><td>340.3</td></tr>
-          <tr><td>Consur Trading Nasca</td><td>81</td><td>2,894.36</td><td>409,841</td><td><span class="pill pb">29.4%</span></td><td>141.6</td></tr>
-          <tr><td>Consur Trading Abancay</td><td>6</td><td>205.00</td><td>32,948</td><td><span class="pill py">2.4%</span></td><td>160.7</td></tr>
-          <tr><td>Consur Trading Arequipa</td><td>6</td><td>215.32</td><td>27,949</td><td><span class="pill py">2.0%</span></td><td>129.8</td></tr>
-          <tr><td>Consur Trading Trujillo</td><td>4</td><td>142.20</td><td>26,847</td><td><span class="pill py">1.9%</span></td><td>188.8</td></tr>
-          <tr><td>UNACEM</td><td>2</td><td>1,600.00</td><td>3,786</td><td><span class="pill pg">0.3%</span></td><td>2.4</td></tr>
-          <tr style="background:#1c1c38"><td><b>Total</b></td><td><b>167</b></td><td><b>7,681.13</b></td><td><b>1,394,326</b></td><td><b>100%</b></td><td><b>220.15</b></td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div style="position:relative;height:160px;margin-top:14px"><canvas id="c-cliente-donut"></canvas></div>
-    <div class="leg" style="margin-top:8px;justify-content:center">
-      <span><span class="dot" style="background:#7c6fe8"></span>Goldmac 64.1%</span>
-      <span><span class="dot" style="background:#5aabf0"></span>Consur Nasca 29.4%</span>
-      <span><span class="dot" style="background:#e0a84c"></span>Otros 6.5%</span>
-    </div>
-  </div>
+  <div class="tp"><h3>Detalle de Incidentes</h3><div class="tw"><table><thead><tr><th>ID</th><th>Fecha</th><th>Tracto</th><th>Operador</th><th>Tipo</th><th>Descripción</th><th>Severidad</th><th>Estatus</th></tr></thead><tbody id="iTB"></tbody></table></div></div>
 </div>
 
-<!-- ========== INCIDENTES ========== -->
-<div class="page" id="page-incidentes">
-  <div class="topbar">
-    <div>
-      <div class="page-title">Análisis de Incidentes</div>
-      <div class="page-sub">Reporte por tipo, unidad y severidad</div>
-    </div>
-    <div class="period-badge">Febrero – Marzo 2026</div>
+<!-- OPERACIONES -->
+<div id="sec-operaciones" class="section">
+  <div class="kpi-row cols3" id="kOp" style="grid-template-columns:repeat(4,1fr)"></div>
+  <div class="tp" style="margin-bottom:20px"><h3>Semáforo de Entrega</h3><div id="semC" style="margin-top:12px"></div></div>
+  <div class="cg c2">
+    <div class="cp"><h3>Indicadores de Entrega (%)</h3><div class="cwrap"><canvas id="oC1"></canvas></div></div>
+    <div class="cp"><h3>Estado Reportes</h3><div class="cwrap"><canvas id="oC2"></canvas></div></div>
   </div>
-
-  <div class="kpi-grid kpi-4">
-    <div class="kpi red">
-      <div class="kpi-lbl">Total Incidentes</div>
-      <div class="kpi-val" style="color:#e05555">9</div>
-      <div class="kpi-compare"><span class="prev-val">Feb: 4 · Mar: 5</span></div>
-    </div>
-    <div class="kpi amber">
-      <div class="kpi-lbl">Severidad Alta</div>
-      <div class="kpi-val" style="color:#e0a84c">5</div>
-      <div class="kpi-compare"><span class="arr-dn">▼</span><b style="color:#e05555;margin-left:4px">55.6%</b></div>
-    </div>
-    <div class="kpi yellow" style="">
-      <div class="kpi-lbl">Severidad Media</div>
-      <div class="kpi-val" style="color:#e0c44c">4</div>
-      <div class="kpi-compare"><span style="color:#888">44.4% del total</span></div>
-    </div>
-    <div class="kpi green">
-      <div class="kpi-lbl">Estado Cerrado</div>
-      <div class="kpi-val" style="color:#4ecf8a">8</div>
-      <div class="kpi-compare"><span class="arr-up">▲</span><b style="color:#4ecf8a;margin-left:4px">88.9%</b><span class="prev-val" style="margin-left:6px">1 abierto</span></div>
-    </div>
-  </div>
-
-  <div class="g2">
-    <div class="card">
-      <div class="card-title">Incidentes por Tipo <span>% del total</span></div>
-      <div style="margin-top:6px">
-        <div class="bar-row">
-          <div class="bar-lbl">Retraso en Carga</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:100%;background:#e05555"></div></div>
-          <div class="bar-val">2 · 22.2%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Retraso en Salida</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:100%;background:#e05555"></div></div>
-          <div class="bar-val">2 · 22.2%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Robo Llanta Repuesto</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:100%;background:#e0a84c"></div></div>
-          <div class="bar-val">2 · 22.2%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Daño en Espejo</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#e0a84c"></div></div>
-          <div class="bar-val">1 · 11.1%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Daño Material Planta</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#e0a84c"></div></div>
-          <div class="bar-val">1 · 11.1%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Daño Posterior Tolva</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#e05555"></div></div>
-          <div class="bar-val">1 · 11.1%</div>
-        </div>
-      </div>
-      <div style="position:relative;height:150px;margin-top:12px"><canvas id="i-donut"></canvas></div>
-      <div class="leg" style="justify-content:center;margin-top:8px">
-        <span><span class="dot" style="background:#e05555"></span>Alta 55.6%</span>
-        <span><span class="dot" style="background:#e0a84c"></span>Media 44.4%</span>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Incidentes por Unidad (Tracto)</div>
-      <div style="margin-top:4px">
-        <div class="bar-row">
-          <div class="bar-lbl">CHP-910 (E. Tapia)</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:100%;background:#e05555"></div></div>
-          <div class="bar-val">2 · 22.2%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">CHP-906 (L. Espino)</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:100%;background:#e05555"></div></div>
-          <div class="bar-val">2 · 22.2%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">CHP-915 (D. Lopez)</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#e0a84c"></div></div>
-          <div class="bar-val">1 · 11.1%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">BUI-896 (P. Monserrate)</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#e0a84c"></div></div>
-          <div class="bar-val">1 · 11.1%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">CHP-916 (D. Vasquez)</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#e0a84c"></div></div>
-          <div class="bar-val">1 · 11.1%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">AYO-724 (C. Ripas)</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#e05555"></div></div>
-          <div class="bar-val">1 · 11.1%</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">BEL-910 (E. Lara)</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#e05555"></div></div>
-          <div class="bar-val">1 · 11.1%</div>
-        </div>
-      </div>
-      <div style="margin-top:12px" class="sec-div">Incidentes por Mes</div>
-      <div class="srow"><span>Febrero 2026</span><span class="pill pr">4 incidentes</span></div>
-      <div class="srow"><span>Marzo 2026</span><span class="pill py">5 incidentes</span></div>
-      <div class="srow"><span>Enero 2026</span><span class="pill pg">0 incidentes</span></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">Detalle de Todos los Incidentes</div>
-    <div class="tbl-wrap" style="margin-top:8px">
-      <table>
-        <thead><tr><th>ID</th><th>Fecha</th><th>Tracto</th><th>Operador</th><th>Tipo</th><th>Severidad</th><th>Causa</th><th>Acción</th><th>Estado</th></tr></thead>
-        <tbody>
-          <tr><td>2026-0001</td><td>12/02/26</td><td>CHP-916</td><td>D. Vasquez</td><td>Daño Espejo</td><td><span class="pill py">MEDIA</span></td><td>Caída de roca</td><td>Mantenimiento</td><td><span class="pill pg">CERRADO</span></td></tr>
-          <tr><td>2026-0002</td><td>15/02/26</td><td>AYO-724</td><td>C. Ripas</td><td>Retraso Carga</td><td><span class="pill pr">ALTA</span></td><td>Demora operativa</td><td>Término contrato</td><td><span class="pill pg">CERRADO</span></td></tr>
-          <tr><td>2026-0003</td><td>15/02/26</td><td>CHP-906</td><td>L. Espino</td><td>Retraso Carga</td><td><span class="pill pr">ALTA</span></td><td>Demora operativa</td><td>Amonestación</td><td><span class="pill pg">CERRADO</span></td></tr>
-          <tr><td>2026-0004</td><td>19/02/26</td><td>CHP-910</td><td>E. Tapia</td><td>Daño Planta</td><td><span class="pill py">MEDIA</span></td><td>Demora en carga</td><td>Amonest. verbal</td><td><span class="pill pg">CERRADO</span></td></tr>
-          <tr><td>2026-0005</td><td>01/03/26</td><td>CHP-915</td><td>D. Lopez</td><td>Retraso Salida</td><td><span class="pill pr">ALTA</span></td><td>Demora operativa</td><td>Amonestación</td><td><span class="pill pg">CERRADO</span></td></tr>
-          <tr><td>2026-0006</td><td>01/03/26</td><td>BUI-896</td><td>P. Monserrate</td><td>Retraso Salida</td><td><span class="pill pr">ALTA</span></td><td>Demora operativa</td><td>Amonestación</td><td><span class="pill pg">CERRADO</span></td></tr>
-          <tr><td>2026-0007</td><td>05/03/26</td><td>BEL-910</td><td>E. Lara</td><td>Daño Tolva</td><td><span class="pill pr">ALTA</span></td><td>Impacto vehículo</td><td>—</td><td><span class="pill pr">ABIERTO</span></td></tr>
-          <tr><td>2026-0008</td><td>12/03/26</td><td>CHP-910</td><td>E. Tapia</td><td>Robo Llanta</td><td><span class="pill py">MEDIA</span></td><td>Demora traslado</td><td>Reposición</td><td><span class="pill pg">CERRADO</span></td></tr>
-          <tr><td>2026-0009</td><td>12/03/26</td><td>CHP-906</td><td>L. Espino</td><td>Robo Llanta</td><td><span class="pill py">MEDIA</span></td><td>Demora traslado</td><td>Reposición</td><td><span class="pill pg">CERRADO</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+  <div class="tp"><h3>Detalle Reportes Operativos</h3><div class="tw"><table><thead><tr><th>Fecha</th><th>Reporte</th><th>Área</th><th>F. Requerida</th><th>F. Envío</th><th>Estado</th></tr></thead><tbody id="oTB"></tbody></table></div></div>
 </div>
 
-<!-- ========== CONTINUIDAD ========== -->
-<div class="page" id="page-continuidad">
-  <div class="topbar">
-    <div>
-      <div class="page-title">Continuidad Operativa</div>
-      <div class="page-sub">Análisis de rotación y disponibilidad de unidades por mes</div>
-    </div>
-    <div class="period-badge">Febrero – Marzo 2026</div>
-  </div>
-
-  <div class="kpi-grid kpi-4">
-    <div class="kpi green">
-      <div class="kpi-lbl">Continuidad Total (SI)</div>
-      <div class="kpi-val" style="color:#4ecf8a">149</div>
-      <div class="kpi-compare"><span class="arr-up">▲</span><b style="color:#4ecf8a;margin-left:4px">87.6%</b></div>
-    </div>
-    <div class="kpi red">
-      <div class="kpi-lbl">Sin Continuidad (NO)</div>
-      <div class="kpi-val" style="color:#e05555">21</div>
-      <div class="kpi-compare"><span class="arr-dn">▼</span><b style="color:#e05555;margin-left:4px">12.4%</b></div>
-    </div>
-    <div class="kpi blue">
-      <div class="kpi-lbl">Días Espera Promedio</div>
-      <div class="kpi-val">2.9 días</div>
-      <div class="kpi-compare"><span class="prev-val">Mín: 0d · Máx: 10d</span></div>
-    </div>
-    <div class="kpi purple">
-      <div class="kpi-lbl">Registros Evaluados</div>
-      <div class="kpi-val">170</div>
-      <div class="kpi-compare"><span class="prev-val">Feb 95 · Mar 75</span></div>
-    </div>
-  </div>
-
-  <div class="g2">
-    <div class="card">
-      <div class="card-title">Continuidad por Mes — SI vs NO</div>
-      <div class="leg">
-        <span><span class="dot" style="background:#4ecf8a"></span>Con Continuidad (SI)</span>
-        <span><span class="dot" style="background:#e05555"></span>Sin Continuidad (NO)</span>
-      </div>
-      <div style="position:relative;height:190px"><canvas id="co-bar"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="card-title">% Continuidad Mensual — Comparativo</div>
-      <div style="margin-top:10px">
-        <div style="margin-bottom:18px">
-          <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:5px">
-            <span>Febrero 2026</span><span><b style="color:#e0a84c">85.3%</b> (81 de 95)</span>
-          </div>
-          <div class="prog-bg" style="height:16px">
-            <div class="prog-fill" style="width:85.3%;background:linear-gradient(90deg,#4ecf8a,#e0a84c);height:100%"></div>
-          </div>
-        </div>
-        <div style="margin-bottom:18px">
-          <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-bottom:5px">
-            <span>Marzo 2026</span><span><b style="color:#4ecf8a">90.7%</b> (68 de 75)</span>
-          </div>
-          <div class="prog-bg" style="height:16px">
-            <div class="prog-fill" style="width:90.7%;background:#4ecf8a;height:100%"></div>
-          </div>
-        </div>
-        <div style="margin-top:16px" class="sec-div">Análisis de días de espera</div>
-        <div class="srow"><span>0 – 2 días (rotación rápida)</span><span class="pill pg">~50%</span></div>
-        <div class="srow"><span>3 días (rotación estándar)</span><span class="pill pb">~35%</span></div>
-        <div class="srow"><span>4 – 5 días (rotación lenta)</span><span class="pill py">~12%</span></div>
-        <div class="srow"><span>6 – 10 días (parada larga)</span><span class="pill pr">~3%</span></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="g2">
-    <div class="card">
-      <div class="card-title">Variación de Continuidad — Comparativo Mensual</div>
-      <div style="position:relative;height:180px"><canvas id="co-line"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Resumen de Continuidad por Cliente</div>
-      <div style="margin-top:6px">
-        <div class="bar-row">
-          <div class="bar-lbl">Consur Nasca</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:92%;background:#4ecf8a"></div></div>
-          <div class="bar-val">~92% cont.</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Consorcio Goldmac</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:84%;background:#e0a84c"></div></div>
-          <div class="bar-val">~84% cont.</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">UNACEM</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:50%;background:#e05555"></div></div>
-          <div class="bar-val">~50% cont.</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Consur Abancay</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:85%;background:#5aabf0"></div></div>
-          <div class="bar-val">~85% cont.</div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-lbl">Consur Arequipa</div>
-          <div class="bar-bg"><div class="bar-fill" style="width:90%;background:#4ecf8a"></div></div>
-          <div class="bar-val">~90% cont.</div>
-        </div>
-        <div style="margin-top:12px" class="sec-div">Tendencia</div>
-        <div class="srow"><span>Mejora Feb → Mar</span><span class="pill pg">+5.4 pp</span></div>
-        <div class="srow"><span>Sin continuidad Feb</span><span class="pill pr">14 registros</span></div>
-        <div class="srow"><span>Sin continuidad Mar</span><span class="pill py">7 registros</span></div>
-      </div>
-    </div>
-  </div>
-
 </div>
-<!-- END PAGES -->
-
-<footer>Transporte Nasca Rojim S.R.L. &nbsp;|&nbsp; Dashboard Operativo Ene–Mar 2026 &nbsp;|&nbsp; 232 viajes registrados</footer>
+<div class="footer">Transporte Nasca Rojim S.R.L. | Dashboard Operativo Ene–Mar 2026 | <span id="totalF"></span> viajes registrados</div>
 </div>
 
 <script>
-// Navigation
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  event.currentTarget.classList.add('active');
-  // init charts lazily
-  if(!window.chartsInit) window.chartsInit = {};
-  if(!window.chartsInit[id]) { initCharts(id); window.chartsInit[id]=true; }
+const D={"r":[["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",15.4,"2026-01-13","CHP-916",null,null],["Ene","DESCARGADO","RETRASADO","MECÁNICA",44.8,"2026-01-13","CHP-907",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",15.3,"2026-01-13","CHP-908",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",32.9,"2026-01-14","CHP-917",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",33.1,"2026-01-14","BUI-896",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",33.0,"2026-01-14","BEL-910",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",32.9,"2026-01-14","BZJ-770",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",32.9,"2026-01-14","CHP-918",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",32.7,"2026-01-14","CHP-909",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",17.4,"2026-01-14","CHP-905",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",17.4,"2026-01-14","CHP-906",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",14.0,"2026-01-15","CHP-911",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",23.6,"2026-01-15","CHP-919",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",24.3,"2026-01-18","BZJ-770",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",24.6,"2026-01-18","CHP-910",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",24.9,"2026-01-18","CHP-915",null,null],["Ene","DESCARGADO","RETRASADO","OPERATIVA",56.9,"2026-01-18","AYO-724",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",25.9,"2026-01-18","CHP-917",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",25.9,"2026-01-18","BUI-896",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",26.8,"2026-01-18","BEL-910",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",25.8,"2026-01-18","CHP-909",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",27.4,"2026-01-18","CHP-919",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",25.0,"2026-01-18","CHP-916",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",20.0,"2026-01-20","CHP-911",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",18.4,"2026-01-20","CHP-905",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",19.9,"2026-01-20","CHP-908",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",18.0,"2026-01-20","CHP-906",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",13.5,"2026-01-22","CHP-919",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",10.5,"2026-01-22","CHP-911",null,null],["Ene","DESCARGADO","ANTICIPADO","SIN DEMORA",30.0,"2026-01-23","CHP-910",null,null],["Ene","DESCARGADO","ANTICIPADO","SIN DEMORA",29.0,"2026-01-23","CHP-916",null,null],["Ene","DESCARGADO","ANTICIPADO","SIN DEMORA",28.8,"2026-01-23","CHP-917",null,null],["Ene","DESCARGADO","ANTICIPADO","SIN DEMORA",29.6,"2026-01-23","CHP-909",null,null],["Ene","DESCARGADO","ANTICIPADO","SIN DEMORA",29.9,"2026-01-23","BZJ-770",null,null],["Ene","DESCARGADO","ANTICIPADO","SIN DEMORA",31.6,"2026-01-23","CHP-915",null,null],["Ene","DESCARGADO","ANTICIPADO","SIN DEMORA",30.2,"2026-01-23","BUI-896",null,null],["Ene","DESCARGADO","ANTICIPADO","SIN DEMORA",30.0,"2026-01-23","BUM-712",null,null],["Ene","DESCARGADO","ANTICIPADO","SIN DEMORA",29.6,"2026-01-23","CHP-918",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-01-25","CHP-918",null,null],["Ene","DESCARGADO","ANTICIPADO","SIN DEMORA",35.8,"2026-01-25","BEL-910",null,null],["Ene","DESCARGADO","ANTICIPADO","SIN DEMORA",35.8,"2026-01-25","CHP-908",null,null],["Ene","DESCARGADO","ANTICIPADO","SIN DEMORA",35.7,"2026-01-25","CHP-906",null,null],["Ene","DESCARGADO","ANTICIPADO","SIN DEMORA",35.4,"2026-01-25","CHP-905",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",12.9,"2026-01-27","CHP-918",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",11.8,"2026-01-27","BUI-896",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",11.6,"2026-01-27","CHP-917",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",11.1,"2026-01-27","CHP-910",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",10.9,"2026-01-27","CHP-916",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",11.1,"2026-01-27","CHP-919",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",10.4,"2026-01-27","BUM-712",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",12.6,"2026-01-27","CHP-915",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",10.2,"2026-01-27","CHP-909",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",17.0,"2026-01-27","CHP-911",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",11.4,"2026-01-27","BZJ-770",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",27.4,"2026-01-29","CHP-918",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",27.5,"2026-01-29","CHP-910",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",28.0,"2026-01-29","BZJ-770",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",9.1,"2026-01-29","CHP-917",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",9.3,"2026-01-29","CHP-915",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",6.3,"2026-01-29","AYO-724",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",9.3,"2026-01-29","CHP-909",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",6.4,"2026-01-29","BUI-896",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",9.4,"2026-01-29","CHP-919",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",6.3,"2026-01-29","BUM-712",null,null],["Ene","DESCARGADO","A TIEMPO","SIN DEMORA",6.4,"2026-01-29","CHP-916",null,null],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",12.1,"2026-02-01","BEL-910",36.47,36.47],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",12.4,"2026-02-01","BUI-896",35.0,35.0],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",12.1,"2026-02-01","CHP-919",35.93,35.93],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",12.1,"2026-02-01","AYO-724",35.56,35.56],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",12.1,"2026-02-01","CHP-911",35.75,35.75],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",11.8,"2026-02-01","BUM-712",35.48,35.48],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",12.2,"2026-02-01","CHP-916",36.02,36.02],["Feb","DESCARGADO","ANTICIPADO","SIN DEMORA",28.9,"2026-02-02","CHP-905",38.22,36.05],["Feb","DESCARGADO","ANTICIPADO","SIN DEMORA",28.9,"2026-02-02","CHP-906",37.08,34.84],["Feb","DESCARGADO","ANTICIPADO","SIN DEMORA",28.5,"2026-02-02","CHP-908",37.11,35.49],["Feb","DESCARGADO","ANTICIPADO","SIN DEMORA",28.8,"2026-02-02","CHP-918",34.6,33.64],["Feb","DESCARGADO","ANTICIPADO","SIN DEMORA",27.7,"2026-02-02","CHP-910",35.19,34.34],["Feb","DESCARGADO","ANTICIPADO","SIN DEMORA",28.9,"2026-02-02","BZJ-770",37.07,36.24],["Feb","DESCARGADO","ANTICIPADO","SIN DEMORA",28.9,"2026-02-02","CHP-917",38.31,37.6],["Feb","DESCARGADO","ANTICIPADO","SIN DEMORA",28.8,"2026-02-02","CHP-915",37.45,36.49],["Feb","DESCARGADO","ANTICIPADO","SIN DEMORA",28.5,"2026-02-02","CHP-909",40.64,40.06],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",6.5,"2026-02-04","BEL-910",800.0,800.0],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",11.2,"2026-02-04","AYO-724",35.91,35.91],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",11.6,"2026-02-04","CHP-911",36.52,36.52],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",9.9,"2026-02-04","BUI-896",35.9,35.9],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",11.2,"2026-02-04","CHP-919",36.04,36.04],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",9.9,"2026-02-04","BUM-712",35.82,35.82],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",10.3,"2026-02-04","CHP-916",33.75,33.75],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",11.4,"2026-02-08","AYO-724",35.66,35.66],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",11.1,"2026-02-08","BEL-910",35.77,35.77],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",49.4,"2026-02-10","CHP-917",37.57,37.53],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",49.4,"2026-02-10","CHP-905",37.28,35.66],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",49.4,"2026-02-10","BZJ-770",37.83,36.85],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",49.4,"2026-02-10","CHP-916",38.28,36.76],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",49.4,"2026-02-10","CHP-915",36.34,35.55],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",49.3,"2026-02-10","CHP-919",38.46,37.46],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",49.2,"2026-02-10","CHP-906",40.81,39.63],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",48.9,"2026-02-10","CHP-918",39.97,38.49],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",49.0,"2026-02-10","CHP-909",37.43,37.11],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",49.4,"2026-02-10","BUI-896",37.8,36.74],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",49.3,"2026-02-10","CHP-911",37.04,37.47],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",48.9,"2026-02-10","CHP-910",39.7,39.12],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",49.1,"2026-02-10","CHP-908",37.84,37.09],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",48.8,"2026-02-10","BUM-712",39.31,38.57],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",13.9,"2026-02-11","AYO-724",35.97,35.97],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",20.0,"2026-02-14","BEL-910",30.0,48.88],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",18.8,"2026-02-14","CHP-919",35.0,43.77],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",16.7,"2026-02-13","CHP-911",40.41,40.41],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",16.8,"2026-02-13","CHP-905",37.1,37.1],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",18.3,"2026-02-14","CHP-910",35.0,46.1],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",19.4,"2026-02-14","CHP-916",35.0,44.28],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",19.9,"2026-02-14","CHP-917",35.0,41.03],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",19.7,"2026-02-14","BZJ-770",35.0,50.51],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",11.6,"2026-02-15","CHP-909",36.57,36.57],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",11.5,"2026-02-15","CHP-908",36.2,36.2],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",11.6,"2026-02-15","CHP-915",35.98,35.98],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",11.4,"2026-02-15","CHP-918",36.16,36.16],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",11.5,"2026-02-15","CHP-906",35.75,35.75],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",11.8,"2026-02-15","AYO-724",34.81,34.81],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",11.7,"2026-02-15","BUM-712",34.66,34.66],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",11.7,"2026-02-15","BUI-896",32.98,32.98],["Feb","DESCARGADO","ANTICIPADO","SIN DEMORA",31.8,"2026-02-19","CHP-911",38.31,36.12],["Feb","DESCARGADO","ANTICIPADO","SIN DEMORA",32.0,"2026-02-19","CHP-905",37.51,36.52],["Feb","DESCARGADO","A TIEMPO","CLIMA",29.6,"2026-02-18","BEL-910",35.6,35.6],["Feb","DESCARGADO","ANTICIPADO","SIN DEMORA",32.5,"2026-02-20","CHP-919",37.54,37.01],["Feb","DESCARGADO","ANTICIPADO","SIN DEMORA",32.4,"2026-02-20","CHP-910",35.46,34.23],["Feb","DESCARGADO","ANTICIPADO","SIN DEMORA",32.3,"2026-02-20","CHP-916",39.88,39.23],["Feb","DESCARGADO","ANTICIPADO","SIN DEMORA",32.3,"2026-02-20","CHP-917",40.83,40.87],["Feb","DESCARGADO","ANTICIPADO","SIN DEMORA",32.2,"2026-02-20","BZJ-770",36.32,34.41],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",34.5,"2026-02-20","CHP-909",40.54,39.75],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",34.5,"2026-02-20","CHP-908",39.83,39.2],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",34.4,"2026-02-20","CHP-915",37.96,36.9],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",34.5,"2026-02-20","CHP-918",39.84,39.68],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",34.3,"2026-02-20","CHP-906",38.46,37.27],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",34.3,"2026-02-20","AYO-724",37.53,36.71],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",34.5,"2026-02-20","BUI-896",38.13,37.08],["Feb","DESCARGADO","RETRASADO","CLIMA",35.6,"2026-02-23","CHP-911",36.12,36.13],["Feb","DESCARGADO","RETRASADO","CLIMA",35.5,"2026-02-23","CHP-905",36.42,36.5],["Feb","DESCARGADO","RETRASADO","CLIMA",35.4,"2026-02-23","BEL-910",35.68,35.76],["Feb","DESCARGADO","RETRASADO","CLIMA",35.5,"2026-02-23","CHP-918",36.72,36.82],["Feb","DESCARGADO","RETRASADO","CLIMA",35.5,"2026-02-23","AYO-724",35.93,35.93],["Feb","DESCARGADO","RETRASADO","CLIMA",35.5,"2026-02-23","CHP-915",35.71,35.71],["Feb","DESCARGADO","RETRASADO","CLIMA",35.5,"2026-02-23","CHP-910",36.17,36.22],["Feb","DESCARGADO","RETRASADO","CLIMA",35.5,"2026-02-23","BUI-896",35.56,35.56],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-02-26","AYO-724",35.32,35.38],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-02-26","CHP-910",35.6,35.65],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-02-26","BEL-910",35.44,35.49],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",12.6,"2026-02-26","BUI-896",34.8,34.8],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",12.6,"2026-02-26","CHP-918",34.92,35.0],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",12.6,"2026-02-26","CHP-905",35.54,35.61],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",12.6,"2026-02-26","CHP-911",35.81,35.82],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",12.6,"2026-02-26","CHP-915",36.34,36.45],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",35.0,"2026-02-26","CHP-906",42.25,40.92],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",34.7,"2026-02-26","CHP-919",42.56,41.77],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",35.0,"2026-02-26","CHP-916",42.2,41.09],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",35.0,"2026-02-26","BZJ-770",41.8,38.33],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",35.0,"2026-02-26","CHP-909",41.72,40.65],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",34.7,"2026-02-26","CHP-908",41.37,40.42],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",35.0,"2026-02-26","BUM-712",44.2,43.39],["Feb","DESCARGADO","A TIEMPO","SIN DEMORA",35.0,"2026-02-26","CHP-917",43.01,40.01],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",14.0,"2026-03-01","BEL-910",35.88,35.94],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.7,"2026-03-01","BUI-896",35.61,35.67],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.8,"2026-03-01","CHP-915",35.74,35.74],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",13.0,"2026-03-01","CHP-905",35.89,35.9],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-03-01","AYO-724",35.74,35.78],["Mar","DESCARGADO","ANTICIPADO","SIN DEMORA",23.0,"2026-03-04","CHP-919",38.92,36.95],["Mar","DESCARGADO","ANTICIPADO","SIN DEMORA",23.0,"2026-03-04","CHP-916",38.0,36.96],["Mar","DESCARGADO","ANTICIPADO","SIN DEMORA",23.0,"2026-03-04","BZJ-770",36.33,35.55],["Mar","DESCARGADO","ANTICIPADO","SIN DEMORA",23.0,"2026-03-04","CHP-909",37.05,34.93],["Mar","DESCARGADO","ANTICIPADO","SIN DEMORA",23.0,"2026-03-04","CHP-908",36.38,34.81],["Mar","DESCARGADO","ANTICIPADO","SIN DEMORA",23.0,"2026-03-04","CHP-906",40.07,38.52],["Mar","DESCARGADO","ANTICIPADO","SIN DEMORA",23.0,"2026-03-04","BUM-712",36.54,34.55],["Mar","DESCARGADO","ANTICIPADO","SIN DEMORA",23.0,"2026-03-04","CHP-917",35.87,34.51],["Mar","DESCARGADO","ANTICIPADO","SIN DEMORA",23.0,"2026-03-04","CHP-910",37.43,36.58],["Mar","DESCARGADO","ANTICIPADO","SIN DEMORA",23.0,"2026-03-04","CHP-918",37.6,35.96],["Mar","DESCARGADO","ANTICIPADO","SIN DEMORA",23.0,"2026-03-04","CHP-911",36.38,33.92],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",20.2,"2026-03-03","BEL-910",35.84,35.83],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",20.2,"2026-03-03","CHP-915",35.12,35.12],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",11.3,"2026-03-04","CHP-905",36.03,35.99],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",11.4,"2026-03-04","BUI-896",35.13,35.18],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",21.3,"2026-03-07","BUI-896",35.28,35.28],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-03-08","CHP-916",35.8,35.66],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-03-08","BZJ-770",35.04,34.79],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-03-08","CHP-909",36.11,36.22],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-03-08","CHP-908",35.92,35.76],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-03-08","CHP-906",35.71,35.81],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-03-08","BUM-712",35.57,35.66],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-03-08","CHP-917",35.43,35.45],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-03-08","CHP-910",35.9,35.96],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-03-08","CHP-918",35.58,35.61],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-03-08","CHP-911",36.21,36.32],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-03-08","CHP-905",35.8,35.78],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-03-08","CHP-915",36.45,36.5],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-03-08","AYO-724",33.77,33.86],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-03-08","BEL-910",35.75,35.73],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.5,"2026-03-08","CHP-919",36.17,36.42],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",12.0,"2026-03-11","CHP-919",36.13,36.17],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",10.4,"2026-03-11","CHP-909",36.06,36.04],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",10.7,"2026-03-11","AYO-724",35.2,35.35],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",21.2,"2026-03-13","BEL-910",33.44,33.24],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",13.3,"2026-03-15","BEL-910",35.74,35.92],["Mar","DESCARGADO","ANTICIPADO","SIN DEMORA",43.5,"2026-03-16","BUI-896",37.02,35.11],["Mar","DESCARGADO","ANTICIPADO","SIN DEMORA",43.5,"2026-03-16","CHP-917",41.2,40.4],["Mar","DESCARGADO","ANTICIPADO","SIN DEMORA",43.5,"2026-03-16","CHP-906",38.15,37.4],["Mar","DESCARGADO","ANTICIPADO","SIN DEMORA",43.5,"2026-03-16","CHP-915",27.17,26.67],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",39.0,"2026-03-16","CHP-916",37.96,36.53],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",39.0,"2026-03-16","BZJ-770",42.09,40.53],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",39.0,"2026-03-16","BUM-712",41.51,39.57],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",18.5,"2026-03-16","CHP-909",36.44,36.52],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",18.5,"2026-03-16","AYO-724",34.8,34.87],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",18.5,"2026-03-16","CHP-919",33.13,33.2],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",14.0,"2026-03-17","BEL-910",35.96,35.98],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",22.0,"2026-03-18","BEL-910",34.0,34.0],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",11.0,"2026-03-18","AYO-724",35.9,36.08],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",11.0,"2026-03-18","CHP-909",35.33,35.28],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",11.0,"2026-03-18","CHP-919",36.55,36.74],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",35.0,"2026-03-20","CHP-910",40.0,37.7],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",38.0,"2026-03-20","CHP-911",40.0,39.55],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",35.0,"2026-03-20","CHP-918",40.0,43.41],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",38.0,"2026-03-20","CHP-905",40.0,39.68],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",35.0,"2026-03-20","CHP-908",40.0,41.17],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",11.5,"2026-03-22","BZJ-770",36.23,36.17],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",11.5,"2026-03-22","CHP-917",35.26,35.2],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",11.5,"2026-03-22","BEL-910",36.44,36.56],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",11.5,"2026-03-22","CHP-916",36.76,36.93],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",11.5,"2026-03-22","BUM-712",35.79,35.93],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",11.5,"2026-03-22","CHP-909",36.63,36.81],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",11.5,"2026-03-22","AYO-724",36.17,36.37],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",11.5,"2026-03-22","CHP-906",35.86,35.81],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",11.5,"2026-03-22","CHP-919",35.38,35.34],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",11.5,"2026-03-22","BUI-896",35.05,34.94],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",11.5,"2026-03-22","CHP-915",36.31,36.48],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",14.5,"2026-03-24","CHP-910",37.65,37.61],["Mar","DESCARGADO","A TIEMPO","SIN DEMORA",14.5,"2026-03-24","CHP-911",34.77,34.76],["Mar","EN RUTA","","",null,"2026-03-25","BUM-712",35.54,null],["Mar","EN RUTA","","",null,"2026-03-25","CHP-919",36.42,null],["Mar","EN RUTA","","",null,"2026-03-25","CHP-905",36.24,null],["Mar","EN RUTA","","",null,"2026-03-25","BZJ-770",36.3,null]],"p":[{"c":"VIVANCO BERROCAL PABLO MAURICIO","t":"BZJ-770","v":"BLA-977","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-22","ir":"T2026-00027","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"TAPIA QUISPE ELIAS ALBERTO","t":"CHP-910","v":"BVB-984","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-22","ir":"T2026-00028","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"LOPEZ GUTIERREZ DANNY YOEL","t":"CHP-915","v":"BUY-997","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-22","ir":"T2026-00029","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"CHIPANA VASQUEZ WILLY JOEL","t":"CHP-909","v":"BVC-998","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-22","ir":"T2026-00030","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"TIPIAN HUARCA MARCO ANTONIO","t":"CHP-917","v":"BVB-996","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-22","ir":"T2026-00031","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"ROJAS QUISPE ABRAHAM","t":"BUM-712","v":"BLA-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-22","ir":"T2026-00032","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"VARGAS CUADROS RENZO MANUEL","t":"BUI-896","v":"BFC-980","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-22","ir":"T2026-00033","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"VASQUEZ GABRIEL DENNIS ALEJANDRO","t":"CHP-916","v":"BUY-998","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-22","ir":"T2026-00034","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"MONSERRATE CARTAGENA PABLO CESAR","t":"CHP-918","v":"BVC-973","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-22","ir":"T2026-00035","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"VIVANCO BERROCAL PABLO MAURICIO","t":"BZJ-770","v":"BLA-977","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-01-27","ir":"T2026-00036","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"TAPIA QUISPE ELIAS ALBERTO","t":"CHP-910","v":"BVB-984","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"COCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-01-27","ir":"T2026-00037","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"LOPEZ GUTIERREZ DANNY YOEL","t":"CHP-915","v":"BUY-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-01-27","ir":"T2026-00038","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"CHIPANA VASQUEZ WILLY JOEL","t":"CHP-909","v":"BVC-998","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-01-27","ir":"T2026-00039","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"TIPIAN HUARCA MARCO ANTONIO","t":"CHP-917","v":"BVB-996","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-01-27","ir":"T2026-00040","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"ROJAS QUISPE ABRAHAM","t":"BUM-712","v":"BLA-979","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-01-27","ir":"T2026-00041","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"VARGAS CUADROS RENZO MANUEL","t":"BUI-896","v":"BFC-980","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-01-27","ir":"T2026-00042","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"VASQUEZ GABRIEL DENNIS ALEJANDRO","t":"CHP-916","v":"BUY-998","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-01-27","ir":"T2026-00043","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"VELARDE CARDENAS JOSE ANGEL","t":"CHP-918","v":"BVC-973","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-01-25","ir":"T2026-00044","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"URIBE CASMA HEINER ELVIS","t":"CHP-919","v":"BVC-989","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-01-27","ir":"T2026-00045","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"HUAMAN HUALPA FREDY ROGER","t":"CHP-905","v":"BVC-997","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-31","ir":"T2026-00046","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"ESPINO TOLEDO LUIS ALBERTO","t":"CHP-906","v":"BVG-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-31","ir":"T2026-00047","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"HUACHIN CASTRO FERNANDO DAVID","t":"CHP-908","v":"BVF-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-31","ir":"T2026-00048","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"VELARDE CARDENAS JOSE ANGEL","t":"CHP-918","v":"BVC-973","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-31","ir":"T2026-00049","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"TAPIA QUISPE ELIAS ALBERTO","t":"CHP-910","v":"BVB-984","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-31","ir":"T2026-00050","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"VIVANCO BERROCAL PABLO MAURICIO","t":"BZJ-770","v":"BLA-977","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-31","ir":"T2026-00051","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"TIPIAN HUARCA MARCO ANTONIO","t":"CHP-917","v":"BVB-996","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-31","ir":"T2026-00052","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"LOPEZ GUTIERREZ DANNY YOEL","t":"CHP-915","v":"BUY-997","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-31","ir":"T2026-00053","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"CHIPANA VASQUEZ WILLY JOEL","t":"CHP-909","v":"BVC-998","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-01-31","ir":"T2026-00061","e":"EJECUTADO","es":"Cerrado","m":"Ene"},{"c":"LARA BERNALES ERICK YONATHAN","t":"BEL-910","v":"BFD-990","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-01","ir":"T2026-00054","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"VARGAS CUADROS RENZO MANUEL","t":"BUI-896","v":"BFC-980","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-01","ir":"T2026-00055","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"URIBE CASMA HEINER ELVIS","t":"CHP-919","v":"BVC-989","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-01","ir":"T2026-00056","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"RIPAS GUILLEN CESAR AUGUSTO KEVIN","t":"AYO-724","v":"BFB-981","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-01","ir":"T2026-00057","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"PEREZ BAUTISTA JAVIER","t":"CHP-911","v":"BVB-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-01","ir":"T2026-00058","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"ROJAS QUISPE ABRAHAM","t":"BUM-712","v":"BLA-979","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-01","ir":"T2026-00059","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"VASQUEZ GABRIEL DENNIS ALEJANDRO","t":"CHP-916","v":"BUY-998","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-01","ir":"T2026-00060","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"HUAMAN HUALPA FREDY ROGER","t":"CHP-905","v":"BVC-997","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-02","ir":"T2026-00061","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"ESPINO TOLEDO LUIS ALBERTO","t":"CHP-906","v":"BVG-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-02","ir":"T2026-00062","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"HUACHIN CASTRO FERNANDO DAVID","t":"CHP-908","v":"BVF-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-02","ir":"T2026-00063","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"VELARDE CARDENAS JOSE ANGEL","t":"CHP-918","v":"BVC-973","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-02","ir":"T2026-00064","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"TAPIA QUISPE ELIAS ALBERTO","t":"CHP-910","v":"BVB-984","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-02","ir":"T2026-00065","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"VIVANCO BERROCAL PABLO MAURICIO","t":"BZJ-770","v":"BLA-977","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-02","ir":"T2026-00066","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"TIPIAN HUARCA MARCO ANTONIO","t":"CHP-917","v":"BVB-996","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-02","ir":"T2026-00067","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"LOPEZ GUTIERREZ DANNY YOEL","t":"CHP-915","v":"BUY-997","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-02","ir":"T2026-00068","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"CHIPANA VASQUEZ WILLY JOEL","t":"CHP-909","v":"BVC-998","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-02","ir":"T2026-00069","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"RIPAS GUILLEN CESAR AUGUSTO KEVIN","t":"AYO-724","v":"BFB-981","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-04","ir":"T2026-00070","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"MONSERRATE CARTAGENA PABLO CESAR","t":"CHP-911","v":"BVB-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-04","ir":"T2026-00071","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"VARGAS CUADROS RENZO MANUEL","t":"BUI-896","v":"BFC-980","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-04","ir":"T2026-00072","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"URIBE CASMA HEINER ELVIS","t":"CHP-919","v":"BVC-989","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-04","ir":"T2026-00073","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"TORRICO ARIAS JHONNY ANDRES","t":"BUM-712","v":"BLA-979","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-04","ir":"T2026-00074","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"VASQUEZ GABRIEL DENNIS ALEJANDRO","t":"CHP-916","v":"BUY-998","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-04","ir":"T2026-00075","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"LARA BERNALES ERICK YONATHAN","t":"BEL-910","v":"BFD-990","cl":"UNIÓN ANDINA DE CEEMENTOS S.A.A. (UNACEM)","ca":"CEMENTO","o":"LIMA","d":"ICA","fs":"2026-02-04","ir":"T2026-00076","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"ESPINO TOLEDO LUIS ALBERTO","t":"CHP-906","v":"BVG-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-08","ir":"T2026-00077","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"HUACHIN CASTRO FERNANDO DAVID","t":"CHP-908","v":"BVF-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-08","ir":"T2026-00078","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"HUAMAN HUALPA FREDY ROGER","t":"CHP-905","v":"BVC-997","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-08","ir":"T2026-00079","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"CHIPANA VASQUEZ WILLY JOEL","t":"CHP-909","v":"BVC-998","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-08","ir":"T2026-00080","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"VELARDE CARDENAS JOSE ANGEL","t":"CHP-918","v":"BVC-973","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-08","ir":"T2026-00081","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"TAPIA QUISPE ELIAS ALBERTO","t":"CHP-910","v":"BVB-984","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-08","ir":"T2026-00082","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"JURADO GUILLEN YERSON DENNYS","t":"BZJ-770","v":"BLA-977","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-08","ir":"T2026-00083","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"TIPIAN HUARCA MARCO ANTONIO","t":"CHP-917","v":"BVB-996","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-05","ir":"T2026-00084","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"LOPEZ GUTIERREZ DANNY YOEL","t":"CHP-915","v":"BUY-997","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-08","ir":"T2026-00085","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"TORRICO ARIAS JHONNY ANDRES","t":"BUM-712","v":"BLA-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-08","ir":"T2026-00086","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"MONSERRATE CARTAGENA PABLO CESAR","t":"CHP-911","v":"BVB-997","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-08","ir":"T2026-00087","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"VASQUEZ GABRIEL DENNIS ALEJANDRO","t":"CHP-916","v":"BUY-998","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-08","ir":"T2026-00088","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"URIBE CASMA HEINER ELVIS","t":"CHP-919","v":"BVC-989","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-08","ir":"T2026-00089","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"VARGAS CUADROS RENZO MANUEL","t":"BUI-896","v":"BFC-980","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-08","ir":"T2026-00090","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"RIPAS GUILLEN CESAR AUGUSTO KEVIN","t":"AYO-724","v":"BFB-981","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-08","ir":"T2026-00091","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"LARA BERNALES ERICK YONATHAN","t":"BEL-910","v":"BFD-990","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-08","ir":"T2026-00092","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"RIPAS GUILLEN CESAR AUGUSTO KEVIN","t":"AYO-724","v":"BFB-981","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-11","ir":"T2026-00093","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"PEREZ BAUTISTA JAVIER","t":"CHP-911","v":"BVB-997","cl":"CONSUR TRADING S.A.C. - AREQUIPA","ca":" POLVO CONCENTRADO","o":"AREQUIPA","d":"NAZCA","fs":"2026-02-13","ir":"T2026-00093","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"ROJAS QUISPE ABRAHAM","t":"CHP-905","v":"BVC-997","cl":"CONSUR TRADING S.A.C. - AREQUIPA","ca":"POLVO CONCENTRADO","o":"AREQUIPA","d":"NAZCA","fs":"2026-02-13","ir":"T2026-00094","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"LARA BERNALES ERICK YONATHAN","t":"BEL-910","v":"BFD-990","cl":"CONSUR TRADING S.A.C. - ABANCAY","ca":"MINERAL BRUTO","o":"ABANCAY","d":"NAZCA","fs":"2026-02-13","ir":"T2026-00095","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"URIBE CASMA HEINER ELVIS","t":"CHP-919","v":"BVC-989","cl":"CONSUR TRADING S.A.C. - ABANCAY","ca":"MINERAL BRUTO","o":"ABANCAY","d":"NAZCA","fs":"2026-02-14","ir":"T2026-00096","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"TAPIA QUISPE ELIAS ALBERTO","t":"CHP-910","v":"BVB-984","cl":"CONSUR TRADING S.A.C. - ABANCAY","ca":"MINERAL BRUTO","o":"ABANCAY","d":"NAZCA","fs":"2026-02-14","ir":"T2026-00097","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"MONSERRATE CARTAGENA PABLO CESAR","t":"CHP-916","v":"BUY-998","cl":"CONSUR TRADING S.A.C. - ABANCAY","ca":"MINERAL BRUTO","o":"ABANCAY","d":"NAZCA","fs":"2026-02-14","ir":"T2026-00098","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"TIPIAN HUARCA MARCO ANTONIO","t":"CHP-917","v":"BVB-996","cl":"CONSUR TRADING S.A.C. - ABANCAY","ca":"MINERAL BRUTO","o":"ABANCAY","d":"NAZCA","fs":"2026-02-14","ir":"T2026-00099","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"JURADO GUILLEN YERSON DENNYS","t":"BZJ-770","v":"BLA-977","cl":"CONSUR TRADING S.A.C. - ABANCAY","ca":"MINERAL BRUTO","o":"ABANCAY","d":"NAZCA","fs":"2026-02-14","ir":"T2026-00100","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"CHIPANA VASQUEZ WILLY JOEL","t":"CHP-909","v":"BVC-998","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-15","ir":"T2026-00101","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"HUACHIN CASTRO FERNANDO DAVID","t":"CHP-908","v":"BVF-979","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-15","ir":"T2026-00102","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"LOPEZ GUTIERREZ DANNY YOEL","t":"CHP-915","v":"BUY-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-15","ir":"T2026-00103","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"VELARDE CARDENAS JOSE ANGEL","t":"CHP-918","v":"BVC-973","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-15","ir":"T2026-00104","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"ESPINO TOLEDO LUIS ALBERTO","t":"CHP-906","v":"BVG-979","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-15","ir":"T2026-00105","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"RIPAS GUILLEN CESAR AUGUSTO KEVIN","t":"AYO-724","v":"BFB-981","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-15","ir":"T2026-00106","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"TORRICO ARIAS JHONNY ANDRES","t":"BUM-712","v":"BLA-979","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-15","ir":"T2026-00107","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"VARGAS CUADROS RENZO MANUEL","t":"BUI-896","v":"BFC-980","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-15","ir":"T2026-00108","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"PEREZ BAUTISTA JAVIER","t":"CHP-911","v":"BVB-997","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-17","ir":"T2026-00109","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"ROJAS QUISPE ABRAHAM","t":"CHP-905","v":"BVC-997","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-17","ir":"T2026-00110","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"HUAMAN HUALPA FREDY ROGER","t":"BEL-910","v":"BFD-990","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-18","ir":"T2026-00111","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"URIBE CASMA HEINER ELVIS","t":"CHP-919","v":"BVC-989","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-18","ir":"T2026-00112","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"TAPIA QUISPE ELIAS ALBERTO","t":"CHP-910","v":"BVB-984","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-18","ir":"T2026-00113","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"VASQUEZ GABRIEL DENNIS ALEJANDRO","t":"CHP-916","v":"BUY-998","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-18","ir":"T2026-00114","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"TIPIAN HUARCA MARCO ANTONIO","t":"CHP-917","v":"BVB-996","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-18","ir":"T2026-00115","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"JURADO GUILLEN YERSON DENNYS","t":"BZJ-770","v":"BLA-977","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-18","ir":"T2026-00116","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"CHIPANA VASQUEZ WILLY JOEL","t":"CHP-909","v":"BVC-998","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-20","ir":"T2026-00117","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"HUACHIN CASTRO FERNANDO DAVID","t":"CHP-908","v":"BVF-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-20","ir":"T2026-00118","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"LOPEZ GUTIERREZ DANNY YOEL","t":"CHP-915","v":"BUY-997","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-20","ir":"T2026-00119","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"MONSERRATE CARTAGENA PABLO CESAR","t":"CHP-918","v":"BVC-973","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-20","ir":"T2026-00120","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"ESPINO TOLEDO LUIS ALBERTO","t":"CHP-906","v":"BVG-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-20","ir":"T2026-00121","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"RIPAS GUILLEN CESAR AUGUSTO KEVIN","t":"AYO-724","v":"BFB-981","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-20","ir":"T2026-00122","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"VARGAS CUADROS RENZO MANUEL","t":"BUI-896","v":"BFC-980","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-20","ir":"T2026-00123","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"PEREZ BAUTISTA JAVIER","t":"CHP-911","v":"BVB-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-23","ir":"T2026-00124","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"HUAMAN HUALPA FREDY ROGER","t":"CHP-905","v":"BVC-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-23","ir":"T2026-00125","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"LARA BERNALES ERICK YONATHAN","t":"BEL-910","v":"BFD-990","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-23","ir":"T2026-00126","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"VELARDE CARDENAS JOSE ANGEL","t":"CHP-918","v":"BVC-973","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-23","ir":"T2026-00128","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"RIPAS GUILLEN CESAR AUGUSTO KEVIN","t":"AYO-724","v":"BFB-981","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-23","ir":"T2026-00129","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"LOPEZ GUTIERREZ DANNY YOEL","t":"CHP-915","v":"BUY-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-23","ir":"T2026-00130","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"TAPIA QUISPE ELIAS ALBERTO","t":"CHP-910","v":"BVB-984","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-23","ir":"T2026-00131","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"ROJAS QUISPE ABRAHAM","t":"BUI-896","v":"BFC-980","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-23","ir":"T2026-00132","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"URIBE CASMA HEINER ELVIS","t":"CHP-919","v":"BVC-989","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-26","ir":"T2026-00133","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"VASQUEZ GABRIEL DENNIS ALEJANDRO","t":"CHP-916","v":"BUY-998","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-26","ir":"T2026-00134","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"JURADO GUILLEN YERSON DENNYS","t":"BZJ-770","v":"BLA-977","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-26","ir":"T2026-00135","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"CHIPANA VASQUEZ WILLY JOEL","t":"CHP-909","v":"BVC-998","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-26","ir":"T2026-00136","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"HUACHIN CASTRO FERNANDO DAVID","t":"CHP-908","v":"BVF-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-26","ir":"T2026-00137","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"ESPINO TOLEDO LUIS ALBERTO","t":"CHP-906","v":"BVG-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-26","ir":"T2026-00138","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"TORRICO ARIAS JHONNY ANDRES","t":"BUM-712","v":"BLA-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-26","ir":"T2026-00139","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"MONSERRATE CARTAGENA PABLO CESAR","t":"CHP-917","v":"BVB-996","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-02-26","ir":"T2026-00140","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"LARA BERNALES ERICK YONATHAN","t":"BEL-910","v":"BFD-990","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-26","ir":"T2026-00141","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"HUAMAN HUALPA FREDY ROGER","t":"CHP-905","v":"BVC-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-26","ir":"T2026-00142","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"PEREZ BAUTISTA JAVIER","t":"CHP-911","v":"BVB-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-26","ir":"T2026-00143","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"VELARDE CARDENAS JOSE ANGEL","t":"CHP-918","v":"BVC-973","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-26","ir":"T2026-00144","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"RIPAS GUILLEN CESAR AUGUSTO KEVIN","t":"AYO-724","v":"BFB-981","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-26","ir":"T2026-00145","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"VARGAS CUADROS RENZO MANUEL","t":"BUI-896","v":"BFC-980","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-26","ir":"T2026-00146","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"TAPIA QUISPE ELIAS ALBERTO","t":"CHP-910","v":"BVB-984","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-26","ir":"T2026-00147","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"ROJAS QUISPE ABRAHAM","t":"CHP-915","v":"BUY-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-02-26","ir":"T2026-00148","e":"EJECUTADO","es":"Cerrado","m":"Feb"},{"c":"LARA BERNALES ERICK YONATHAN","t":"BEL-910","v":"BFD-990","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-01","ir":"T2026-00149","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"MONSERRATE CARTAGENA PABLO CESAR","t":"BUI-896","v":"BFC-980","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-01","ir":"T2026-00150","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"LOPEZ GUTIERREZ DANNY YOEL","t":"CHP-915","v":"BUY-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-01","ir":"T2026-00151","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"HUAMAN HUALPA FREDY ROGER","t":"CHP-905","v":"BVC-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-01","ir":"T2026-00152","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"RIPAS GUILLEN CESAR AUGUSTO KEVIN","t":"AYO-724","v":"BFB-981","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-01","ir":"T2026-00153","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"URIBE CASMA HEINER ELVIS","t":"CHP-919","v":"BVC-989","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-03","ir":"T2026-00154","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"VASQUEZ GABRIEL DENNIS ALEJANDRO","t":"CHP-916","v":"BUY-998","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-03","ir":"T2026-00155","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"JURADO GUILLEN YERSON DENNYS","t":"BZJ-770","v":"BLA-977","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-03","ir":"T2026-00156","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"CHIPANA VASQUEZ WILLY JOEL","t":"CHP-909","v":"BVC-998","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-03","ir":"T2026-00157","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"ROJAS QUISPE ABRAHAM","t":"CHP-908","v":"BVF-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-03","ir":"T2026-00158","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"ESPINO TOLEDO LUIS ALBERTO","t":"CHP-906","v":"BVG-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-03","ir":"T2026-00159","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"TORRICO ARIAS JHONNY ANDRES","t":"BUM-712","v":"BLA-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-03","ir":"T2026-00160","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"TIPIAN HUARCA MARCO ANTONIO","t":"CHP-917","v":"BVB-996","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-03","ir":"T2026-00161","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"TAPIA QUISPE ELIAS ALBERTO","t":"CHP-910","v":"BVB-984","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-03","ir":"T2026-00162","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"VELARDE CARDENAS JOSE ANGEL","t":"CHP-918","v":"BVC-973","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-03","ir":"T2026-00163","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"PEREZ BAUTISTA JAVIER","t":"CHP-911","v":"BVB-997","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-03","ir":"T2026-00164","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"LARA BERNALES ERICK YONATHAN","t":"BEL-910","v":"BFD-990","cl":"CONSUR TRADING S.A.C. - TRUJILLO","ca":"CONCENTRADO","o":"TRUJILLO","d":"LIMA","fs":"2026-03-03","ir":"T2026-00165","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"LOPEZ GUTIERREZ DANNY YOEL","t":"CHP-915","v":"BUY-997","cl":"CONSUR TRADING S.A.C. - TRUJILLO","ca":"CONCENTRADO","o":"TRUJILLO","d":"LIMA","fs":"2026-03-03","ir":"T2026-00166","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"HUAMAN HUALPA FREDY ROGER","t":"CHP-905","v":"BVC-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-04","ir":"T2026-00168","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"RIPAS GUILLEN CESAR AUGUSTO KEVIN","t":"BUI-896","v":"BFC-980","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-04","ir":"T2026-00169","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"RIPAS GUILLEN CESAR AUGUSTO KEVIN","t":"BUI-896","v":"BFC-980","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"TRUJILLO","d":"LIMA","fs":"2026-03-07","ir":"T2026-00170","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"VASQUEZ GABRIEL DENNIS ALEJANDRO","t":"CHP-916","v":"BUY-998","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-08","ir":"T2026-00171","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"VIVANCO BERROCAL PABLO MAURICIO","t":"BZJ-770","v":"BLA-977","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-08","ir":"T2026-00172","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"CHIPANA VASQUEZ WILLY JOEL","t":"CHP-909","v":"BVC-998","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-08","ir":"T2026-00173","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"HUACHIN CASTRO FERNANDO DAVID","t":"CHP-908","v":"BVF-979","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-08","ir":"T2026-00174","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"ESPINO TOLEDO LUIS ALBERTO","t":"CHP-906","v":"BVG-979","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-08","ir":"T2026-00175","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"TORRICO ARIAS JHONNY ANDRES","t":"BUM-712","v":"BLA-979","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-08","ir":"T2026-00176","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"TIPIAN HUARCA MARCO ANTONIO","t":"CHP-917","v":"BVB-996","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-08","ir":"T2026-00177","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"TAPIA QUISPE ELIAS ALBERTO","t":"CHP-910","v":"BVB-984","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-08","ir":"T2026-00178","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"VELARDE CARDENAS JOSE ANGEL","t":"CHP-918","v":"BVC-973","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-08","ir":"T2026-00179","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"PEREZ BAUTISTA JAVIER","t":"CHP-911","v":"BVB-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-08","ir":"T2026-00180","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"HUAMAN HUALPA FREDY ROGER","t":"CHP-905","v":"BVC-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-08","ir":"T2026-00181","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"LOPEZ GUTIERREZ DANNY YOEL","t":"CHP-915","v":"BUY-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-08","ir":"T2026-00182","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"ROJAS QUISPE ABRAHAM","t":"AYO-724","v":"BFB-981","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-08","ir":"T2026-00183","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"LARA BERNALES ERICK YONATHAN","t":"BEL-910","v":"BFD-990","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-08","ir":"T2026-00184","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"HUAYTA QUISPE GINO ALEXIS","t":"CHP-919","v":"BVC-989","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-08","ir":"T2026-00185","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"LARA BERNALES ERICK YONATHAN","t":"BEL-910","v":"BVE-991","cl":"CONSUR TRADING S.A.C. - AREQUIPA","ca":"CONCENTRADO","o":"AREQUIPA","d":"NAZCA","fs":"2026-03-11","ir":"T2026-00186","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"RIPAS GUILLEN CESAR AUGUSTO KEVIN","t":"AYO-724","v":"BFB-981","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-11","ir":"T2026-00187","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"CHIPANA VASQUEZ WILLY JOEL","t":"CHP-909","v":"BVC-998","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-11","ir":"T2026-00188","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"URIBE CASMA HEINER ELVIS","t":"CHP-919","v":"BVC-989","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-11","ir":"T2026-00189","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"VIVANCO BERROCAL PABLO MAURICIO","t":"BZJ-770","v":"BLA-977","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-13","ir":"T2026-00190","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"TORRICO ARIAS JHONNY ANDRES","t":"BUM-712","v":"BLA-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-13","ir":"T2026-00191","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"HUAYTA QUISPE GINO ALEXIS","t":"BUI-896","v":"BFC-980","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-13","ir":"T2026-00192","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"TAPIA QUISPE ELIAS ALBERTO","t":"CHP-910","v":"BVB-984","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-13","ir":"T2026-00193","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"PEREZ BAUTISTA JAVIER","t":"CHP-911","v":"BVB-997","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-13","ir":"T2026-00194","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"LOPEZ GUTIERREZ DANNY YOEL","t":"CHP-915","v":"BUY-997","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-13","ir":"T2026-00195","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"VASQUEZ GABRIEL DENNIS ALEJANDRO","t":"CHP-916","v":"BUY-998","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-13","ir":"T2026-00196","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"TIPIAN HUARCA MARCO ANTONIO","t":"CHP-917","v":"BVB-996","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-13","ir":"T2026-00197","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"VELARDE CARDENAS JOSE ANGEL","t":"CHP-918","v":"BVC-973","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-13","ir":"T2026-00198","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"HUAMAN HUALPA FREDY ROGER","t":"CHP-905","v":"BVC-997","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-13","ir":"T2026-00199","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"ESPINO TOLEDO LUIS ALBERTO","t":"CHP-906","v":"BVG-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-13","ir":"T2026-00200","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"HUACHIN CASTRO FERNANDO DAVID","t":"CHP-908","v":"BVF-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-13","ir":"T2026-00201","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"LARA BERNALES ERICK YONATHAN","t":"BEL-910","v":"BVE-991","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-15","ir":"T2026-00202","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"JURADO GUILLEN YERSON DENNYS","t":"AYO-724","v":"BFB-981","cl":"CONSUR TRADING S.A.C. - AREQUIPA","ca":"CONCENTRADO","o":"AREQUIPA","d":"NAZCA","fs":"2026-03-16","ir":"T2026-00203","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"CHIPANA VASQUEZ WILLY JOEL","t":"CHP-909","v":"BVC-998","cl":"CONSUR TRADING S.A.C. - AREQUIPA","ca":"CONCENTRADO","o":"AREQUIPA","d":"NAZCA","fs":"2026-03-16","ir":"T2026-00204","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"URIBE CASMA HEINER ELVIS","t":"CHP-919","v":"BVC-989","cl":"CONSUR TRADING S.A.C. - AREQUIPA","ca":"CONCENTRADO","o":"AREQUIPA","d":"NAZCA","fs":"2026-03-16","ir":"T2026-00205","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"LARA BERNALES ERICK YONATHAN","t":"BEL-910","v":"BVE-991","cl":"CONSUR TRADING S.A.C. - TRUJILLO","ca":"CONCENTRADO","o":"TRUJILLO","d":"LIMA","fs":"2026-03-17","ir":"T2026-00206","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"RIPAS GUILLEN CESAR AUGUSTO KEVIN","t":"AYO-724","v":"BFB-981","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-18","ir":"T2026-00207","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"CHIPANA VASQUEZ WILLY JOEL","t":"CHP-909","v":"BVC-998","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-18","ir":"T2026-00208","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"URIBE CASMA HEINER ELVIS","t":"CHP-919","v":"BVC-989","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-18","ir":"T2026-00209","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"LARA BERNALES ERICK YONATHAN","t":"BEL-910","v":"BVE-991","cl":"UNIÓN ANDINA DE CEEMENTOS S.A.A. (UNACEM)","ca":"CONCENTRADO","o":"LIMA","d":"ICA","fs":"2026-03-18","ir":"T2026-00210","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"LARA BERNALES ERICK YONATHAN","t":"BEL-910","v":"BVE-991","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-22","ir":"T2026-00211","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"RIPAS GUILLEN CESAR AUGUSTO KEVIN","t":"AYO-724","v":"BFB-981","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-22","ir":"T2026-00212","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"ROJAS QUISPE ABRAHAM","t":"CHP-906","v":"BVG-979","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-22","ir":"T2026-00213","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"JURADO GUILLEN YERSON DENNYS","t":"CHP-909","v":"BVC-998","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-22","ir":"T2026-00214","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"URIBE CASMA HEINER ELVIS","t":"CHP-919","v":"BVC-989","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-22","ir":"T2026-00215","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"VIVANCO BERROCAL PABLO MAURICIO","t":"BZJ-770","v":"BLA-977","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-22","ir":"T2026-00216","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"TORRICO ARIAS JHONNY ANDRES","t":"BUM-712","v":"BLA-979","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-22","ir":"T2026-00217","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"HUAYTA QUISPE GINO ALEXIS","t":"BUI-896","v":"BFC-980","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-22","ir":"T2026-00218","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"LOPEZ GUTIERREZ DANNY YOEL","t":"CHP-915","v":"BUY-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-22","ir":"T2026-00219","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"VASQUEZ GABRIEL DENNIS ALEJANDRO","t":"CHP-916","v":"BUY-998","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-22","ir":"T2026-00220","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"TIPIAN HUARCA MARCO ANTONIO","t":"CHP-917","v":"BVB-996","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-22","ir":"T2026-00221","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"LEODAN BARBOZA LEON","t":"CHP-910","v":"BVB-984","cl":"CONSUR TRADING S.A.C. - AREQUIPA","ca":"CONCENTRADO","o":"AREQUIPA","d":"NAZCA","fs":"2026-03-24","ir":"T2026-00222","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"PEREZ BAUTISTA JAVIER","t":"CHP-911","v":"BVB-997","cl":"CONSUR TRADING S.A.C. - AREQUIPA","ca":"CONCENTRADO","o":"AREQUIPA","d":"NAZCA","fs":"2026-03-24","ir":"T2026-00223","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"HUAMAN HUALPA FREDY ROGER","t":"CHP-905","v":"BVC-997","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-25","ir":"T2026-00224","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"URIBE CASMA HEINER ELVIS","t":"CHP-919","v":"BVC-989","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-25","ir":"T2026-00225","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"VIVANCO BERROCAL PABLO MAURICIO","t":"BZJ-770","v":"BLA-977","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-25","ir":"T2026-00226","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"TORRICO ARIAS JHONNY ANDRES","t":"BUM-712","v":"BLA-979","cl":"CONSUR TRADING S.A.C. - NASCA","ca":"CONCENTRADO","o":"NAZCA","d":"LIMA","fs":"2026-03-25","ir":"T2026-00227","e":"EJECUTADO","es":"Cerrado","m":"Mar"},{"c":"JURADO GUILLEN YERSON DENNYS","t":"CHP-915","v":"BUY-997","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-26","ir":"T2026-00228","e":"NO EJECUTADO","es":"PROGRAMADO","m":"Mar"},{"c":"VASQUEZ GABRIEL DENNIS ALEJANDRO","t":"CHP-916","v":"BUY-998","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-26","ir":"T2026-00229","e":"NO EJECUTADO","es":"PROGRAMADO","m":"Mar"},{"c":"TIPIAN HUARCA MARCO ANTONIO","t":"CHP-917","v":"BVB-996","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-26","ir":"T2026-00230","e":"NO EJECUTADO","es":"PROGRAMADO","m":"Mar"},{"c":"VELARDE CARDENAS JOSE ANGEL","t":"CHP-918","v":"BVC-973","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-26","ir":"T2026-00231","e":"NO EJECUTADO","es":"PROGRAMADO","m":"Mar"},{"c":"ESPINO TOLEDO LUIS ALBERTO","t":"CHP-906","v":"BVG-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-26","ir":"T2026-00232","e":"NO EJECUTADO","es":"PROGRAMADO","m":"Mar"},{"c":"HUACHIN CASTRO FERNANDO DAVID","t":"CHP-908","v":"BVF-979","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-26","ir":"T2026-00233","e":"NO EJECUTADO","es":"PROGRAMADO","m":"Mar"},{"c":"CHIPANA VASQUEZ WILLY JOEL","t":"CHP-909","v":"BVC-998","cl":"CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","ca":"CONCENTRADO","o":"CUZCO","d":"NAZCA","fs":"2026-03-26","ir":"T2026-00234","e":"NO EJECUTADO","es":"PROGRAMADO","m":"Mar"},{"c":"HUAYTA QUISPE GINO ALEXIS","t":"BUI-896","v":"BFC-980","cl":"CONSUR TRADING S.A.C. - AREQUIPA","ca":"CONCENTRADO","o":"AREQUIPA","d":"NAZCA","fs":"2026-03-27","ir":"T2026-00235","e":"NO EJECUTADO","es":"PROGRAMADO","m":"Mar"},{"c":"LEODAN BARBOZA LEON","t":"CHP-911","v":"BVB-997","cl":"CONSUR TRADING S.A.C. - AREQUIPA","ca":"CONCENTRADO","o":"AREQUIPA","d":"NAZCA","fs":"2026-03-27","ir":"T2026-00236","e":"NO EJECUTADO","es":"PROGRAMADO","m":"Mar"}],"o":[["01/02/2026","OTIF","OPERACIONES","03/03/2026","03/03/2026","ENVIADO A TIEMPO","Feb"],["01/02/2026","VIAJES CUMPLIDOS","OPERACIONES","03/03/2026","03/03/2026","ENVIADO A TIEMPO","Feb"],["01/02/2026","INCIDENTES EN RUTA","OPERACIONES","03/03/2026","03/03/2026","ENVIADO A TIEMPO","Feb"],["01/02/2026","TIEMPO DE RESPUESTA","OPERACIONES","03/03/2026","03/03/2026","ENVIADO A TIEMPO","Feb"],["01/02/2026","DESVIOS NO AUTORIZADOS","OPERACIONES","03/03/2026","03/03/2026","ENVIADO A TIEMPO","Feb"],["01/02/2026","REPORTES OPERATIVOS EN TIEMPO","OPERACIONES","03/03/2026","03/03/2026","ENVIADO A TIEMPO","Feb"],["01/02/2026","CONTINUIDAD OPERATIVA","OPERACIONES","03/03/2026","03/03/2026","ENVIADO A TIEMPO","Feb"],["01/03/2026","OTIF","OPERACIONES","03/04/2026","","-","Mar"],["01/03/2026","VIAJES CUMPLIDOS","OPERACIONES","03/04/2026","","-","Mar"],["01/03/2026","INCIDENTES EN RUTA","OPERACIONES","03/04/2026","","-","Mar"],["01/03/2026","TIEMPO DE RESPUESTA","OPERACIONES","03/04/2026","","-","Mar"],["01/03/2026","DESVIOS NO AUTORIZADOS","OPERACIONES","03/04/2026","","-","Mar"],["01/03/2026","REPORTES OPERATIVOS EN TIEMPO","OPERACIONES","03/04/2026","","-","Mar"],["01/03/2026","CONTINUIDAD OPERATIVA","OPERACIONES","03/04/2026","","-","Mar"]],"i":[["2026-0001","12/02/2026","CHP-916","DENNIS VASQUEZ","DAÑO EN EL ESPEJO","CAIDA DE ROCA SOBRE EL ESPEJO LADO CONDUCTOR ","MEDIA","CERRADO","Feb"],["2026-0002","15/02/2026","AYO-724","CESAR RIPAS","RETRASO EN CARGA","DEMORA DEL CONDUCTOR EN PRESENTARSE A REALIZAR LA CARGA","ALTA","CERRADO","Feb"],["2026-0003","15/02/2026","CHP-906","LUIS ESPINO","RETRASO EN CARGA","DEMORA DEL CONDUCTOR EN PRESENTARSE A REALIZAR LA CARGA","ALTA","CERRADO","Feb"],["2026-0004","19/02/2026","CHP-910","ELIAS TAPIA","DAÑO MATERIAL EN PLANTA ","DAÑO LEVE EN EL SOPORTE DE MANGUERAS, PLANTA CUSCO","MEDIA","CERRADO","Feb"],["2026-0005","01/03/2026","CHP-915","DANNY LOPEZ","RETRASO EN SALIDA","DEMORA EN SALIDA DE COMBOY HACIA LIMA","ALTA","CERRADO","Mar"],["2026-0006","01/03/2026","BUI-896","PABLO MONSERRATE","RETRASO EN SALIDA","DEMORA EN SALIDA DE COMBOY HACIA LIMA","ALTA","CERRADO","Mar"],["2026-0007","05/03/2026","BEL-910","ERICK LARA","DAÑO POSTERIOR DE TOLVA","VEHICULO TERCERO IMPACTO CON LA TOLVA DE LA UNIDAD CAUSANDOLE DAÑO AL PISTON","ALTA","ABIERTO","Mar"],["2026-0008","12/03/2026","CHP-910","ELIAS TAPIA","ROBO DE LLANTA DE REPUESTO DE CARRETA","LA UNIDAD SE QUEDO A PECNORTAR EN EL GRIFO DE LA JOYA Y POR LA MAÑANA SE DIO CUE","MEDIA","CERRADO","Mar"],["2026-0009","12/03/2026","CHP-906","LUIS ESPINO","ROBO DE LLANTA DE REPUESTO DELANTERA","LA UNIDAD SE QUEDO A PECNORTAR EN EL GRIFO DE LA JOYA Y POR LA MAÑANA SE DIO CUE","MEDIA","CERRADO","Mar"]],"c":[["BEL-910","DESCARGADO",5164.15,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-01",36.47,36.47],["BUI-896","DESCARGADO",4956.0,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-01",35.0,35.0],["CHP-919","DESCARGADO",5087.69,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-01",35.93,35.93],["AYO-724","DESCARGADO",5035.3,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-01",35.56,35.56],["CHP-911","DESCARGADO",5062.2,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-01",35.75,35.75],["BUM-712","DESCARGADO",5023.97,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-01",35.48,35.48],["CHP-916","DESCARGADO",5100.43,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-01",36.02,36.02],["CHP-905","DESCARGADO",12617.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-02",38.22,36.05],["CHP-906","DESCARGADO",12194.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-02",37.08,34.84],["CHP-908","DESCARGADO",12421.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-02",37.11,35.49],["CHP-918","DESCARGADO",11774.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-02",34.6,33.64],["CHP-910","DESCARGADO",12019.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-02",35.19,34.34],["BZJ-770","DESCARGADO",12684.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-02",37.07,36.24],["CHP-917","DESCARGADO",13160.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-02",38.31,37.6],["CHP-915","DESCARGADO",12771.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-02",37.45,36.49],["CHP-909","DESCARGADO",14021.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-02",40.64,40.06],["BEL-910","DESCARGADO",1892.96,"Feb","UNIÓN ANDINA DE CEEMENTOS S.A.A. (UNACEM)","2026-02-04",800.0,800.0],["AYO-724","DESCARGADO",5084.86,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-04",35.91,35.91],["CHP-911","DESCARGADO",5171.23,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-04",36.52,36.52],["BUI-896","DESCARGADO",5083.44,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-04",35.9,35.9],["CHP-919","DESCARGADO",5103.26,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-04",36.04,36.04],["BUM-712","DESCARGADO",5072.11,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-04",35.82,35.82],["CHP-916","DESCARGADO",4779.0,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-04",33.75,33.75],["AYO-724","DESCARGADO",5049.46,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-08",35.66,35.66],["BEL-910","DESCARGADO",5065.03,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-08",35.77,35.77],["CHP-917","DESCARGADO",13135.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-10",37.57,37.53],["CHP-905","DESCARGADO",12481.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-10",37.28,35.66],["BZJ-770","DESCARGADO",12897.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-10",37.83,36.85],["CHP-916","DESCARGADO",12866.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-10",38.28,36.76],["CHP-915","DESCARGADO",12442.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-10",36.34,35.55],["CHP-919","DESCARGADO",13111.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-10",38.46,37.46],["CHP-906","DESCARGADO",13870.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-10",40.81,39.63],["CHP-918","DESCARGADO",13471.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-10",39.97,38.49],["CHP-909","DESCARGADO",12988.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-10",37.43,37.11],["BUI-896","DESCARGADO",12859.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-10",37.8,36.74],["CHP-911","DESCARGADO",13114.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-10",37.04,37.47],["CHP-910","DESCARGADO",13692.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-10",39.7,39.12],["CHP-908","DESCARGADO",12981.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-10",37.84,37.09],["BUM-712","DESCARGADO",13499.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-10",39.31,38.57],["AYO-724","DESCARGADO",5093.35,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-11",35.97,35.97],["BEL-910","DESCARGADO",5865.6,"Feb","CONSUR TRADING S.A.C. - ABANCAY","2026-02-14",30.0,48.88],["CHP-919","DESCARGADO",5252.4,"Feb","CONSUR TRADING S.A.C. - ABANCAY","2026-02-14",35.0,43.77],["CHP-911","DESCARGADO",5245.22,"Feb","CONSUR TRADING S.A.C. - AREQUIPA","2026-02-13",40.41,40.41],["CHP-905","DESCARGADO",4815.58,"Feb","CONSUR TRADING S.A.C. - AREQUIPA","2026-02-13",37.1,37.1],["CHP-910","DESCARGADO",5532.0,"Feb","CONSUR TRADING S.A.C. - ABANCAY","2026-02-14",35.0,46.1],["CHP-916","DESCARGADO",5313.6,"Feb","CONSUR TRADING S.A.C. - ABANCAY","2026-02-14",35.0,44.28],["CHP-917","DESCARGADO",4923.6,"Feb","CONSUR TRADING S.A.C. - ABANCAY","2026-02-14",35.0,41.03],["BZJ-770","DESCARGADO",6061.2,"Feb","CONSUR TRADING S.A.C. - ABANCAY","2026-02-14",35.0,50.51],["CHP-909","DESCARGADO",5178.31,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-15",36.57,36.57],["CHP-908","DESCARGADO",5125.92,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-15",36.2,36.2],["CHP-915","DESCARGADO",5094.77,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-15",35.98,35.98],["CHP-918","DESCARGADO",5120.26,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-15",36.16,36.16],["CHP-906","DESCARGADO",5062.2,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-15",35.75,35.75],["AYO-724","DESCARGADO",4929.1,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-15",34.81,34.81],["BUM-712","DESCARGADO",4907.86,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-15",34.66,34.66],["BUI-896","DESCARGADO",4669.97,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-15",32.98,32.98],["CHP-911","DESCARGADO",12642.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-19",38.31,36.12],["CHP-905","DESCARGADO",12782.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-19",37.51,36.52],["BEL-910","DESCARGADO",5040.96,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-18",35.6,35.6],["CHP-919","DESCARGADO",12953.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-20",37.54,37.01],["CHP-910","DESCARGADO",11980.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-20",35.46,34.23],["CHP-916","DESCARGADO",13730.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-20",39.88,39.23],["CHP-917","DESCARGADO",14304.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-20",40.83,40.87],["BZJ-770","DESCARGADO",12043.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-20",36.32,34.41],["CHP-909","DESCARGADO",13912.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-20",40.54,39.75],["CHP-908","DESCARGADO",13720.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-20",39.83,39.2],["CHP-915","DESCARGADO",12915.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-20",37.96,36.9],["CHP-918","DESCARGADO",13888.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-20",39.84,39.68],["CHP-906","DESCARGADO",13044.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-20",38.46,37.27],["AYO-724","DESCARGADO",12848.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-20",37.53,36.71],["BUI-896","DESCARGADO",12978.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-20",38.13,37.08],["CHP-911","DESCARGADO",5114.59,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-23",36.12,36.13],["CHP-905","DESCARGADO",5157.07,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-23",36.42,36.5],["BEL-910","DESCARGADO",5052.29,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-23",35.68,35.76],["CHP-918","DESCARGADO",5199.55,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-23",36.72,36.82],["AYO-724","DESCARGADO",5087.69,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-23",35.93,35.93],["CHP-915","DESCARGADO",5056.54,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-23",35.71,35.71],["CHP-910","DESCARGADO",5121.67,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-23",36.17,36.22],["BUI-896","DESCARGADO",5035.3,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-23",35.56,35.56],["AYO-724","DESCARGADO",5001.31,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-26",35.32,35.38],["CHP-910","DESCARGADO",5040.96,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-26",35.6,35.65],["BEL-910","DESCARGADO",5018.3,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-26",35.44,35.49],["BUI-896","DESCARGADO",4927.68,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-26",34.8,34.8],["CHP-918","DESCARGADO",4944.67,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-26",34.92,35.0],["CHP-905","DESCARGADO",5032.46,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-26",35.54,35.61],["CHP-911","DESCARGADO",5070.7,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-26",35.81,35.82],["CHP-915","DESCARGADO",5145.74,"Feb","CONSUR TRADING S.A.C. - NASCA","2026-02-26",36.34,36.45],["CHP-906","DESCARGADO",14322.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-26",42.25,40.92],["CHP-919","DESCARGADO",14619.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-26",42.56,41.77],["CHP-916","DESCARGADO",14381.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-26",42.2,41.09],["BZJ-770","DESCARGADO",13415.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-26",41.8,38.33],["CHP-909","DESCARGADO",14227.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-26",41.72,40.65],["CHP-908","DESCARGADO",14147.0,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-26",41.37,40.42],["BUM-712","DESCARGADO",15186.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-26",44.2,43.39],["CHP-917","DESCARGADO",14003.5,"Feb","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-02-26",43.01,40.01],["BEL-910","DESCARGADO",5080.61,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-01",35.88,35.94],["BUI-896","DESCARGADO",5042.38,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-01",35.61,35.67],["CHP-915","DESCARGADO",5060.78,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-01",35.74,35.74],["CHP-905","DESCARGADO",5082.02,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-01",35.89,35.9],["AYO-724","DESCARGADO",5060.78,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-01",35.74,35.78],["CHP-919","DESCARGADO",12932.5,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-04",38.92,36.95],["CHP-916","DESCARGADO",12936.0,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-04",38.0,36.96],["BZJ-770","DESCARGADO",12442.5,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-04",36.33,35.55],["CHP-909","DESCARGADO",12225.5,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-04",37.05,34.93],["CHP-908","DESCARGADO",12183.5,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-04",36.38,34.81],["CHP-906","DESCARGADO",13482.0,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-04",40.07,38.52],["BUM-712","DESCARGADO",12092.5,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-04",36.54,34.55],["CHP-917","DESCARGADO",12078.5,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-04",35.87,34.51],["CHP-910","DESCARGADO",12803.0,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-04",37.43,36.58],["CHP-918","DESCARGADO",12586.0,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-04",37.6,35.96],["CHP-911","DESCARGADO",11872.0,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-04",36.38,33.92],["BEL-910","DESCARGADO",6766.59,"Mar","CONSUR TRADING S.A.C. - TRUJILLO","2026-03-03",35.84,35.83],["CHP-915","DESCARGADO",6630.66,"Mar","CONSUR TRADING S.A.C. - TRUJILLO","2026-03-03",35.12,35.12],["CHP-905","DESCARGADO",5101.85,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-04",36.03,35.99],["BUI-896","DESCARGADO",4974.41,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-04",35.13,35.18],["BUI-896","DESCARGADO",6660.86,"Mar","CONSUR TRADING S.A.C. - TRUJILLO","2026-03-07",35.28,35.28],["CHP-916","DESCARGADO",5069.28,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-08",35.8,35.66],["BZJ-770","DESCARGADO",4961.66,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-08",35.04,34.79],["CHP-909","DESCARGADO",5113.18,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-08",36.11,36.22],["CHP-908","DESCARGADO",5086.27,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-08",35.92,35.76],["CHP-906","DESCARGADO",5056.54,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-08",35.71,35.81],["BUM-712","DESCARGADO",5036.71,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-08",35.57,35.66],["CHP-917","DESCARGADO",5016.89,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-08",35.43,35.45],["CHP-910","DESCARGADO",5083.44,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-08",35.9,35.96],["CHP-918","DESCARGADO",5038.13,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-08",35.58,35.61],["CHP-911","DESCARGADO",5127.34,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-08",36.21,36.32],["CHP-905","DESCARGADO",5069.28,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-08",35.8,35.78],["CHP-915","DESCARGADO",5161.32,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-08",36.45,36.5],["AYO-724","DESCARGADO",4781.83,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-08",33.77,33.86],["BEL-910","DESCARGADO",5062.2,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-08",35.75,35.73],["CHP-919","DESCARGADO",5121.67,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-08",36.17,36.42],["CHP-919","DESCARGADO",5116.01,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-11",36.13,36.17],["CHP-909","DESCARGADO",5106.1,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-11",36.06,36.04],["AYO-724","DESCARGADO",4984.32,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-11",35.2,35.35],["BEL-910","DESCARGADO",4340.51,"Mar","CONSUR TRADING S.A.C. - AREQUIPA","2026-03-13",33.44,33.24],["BEL-910","DESCARGADO",5060.78,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-15",35.74,35.92],["BUI-896","DESCARGADO",12288.5,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-16",37.02,35.11],["CHP-917","DESCARGADO",14140.0,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-16",41.2,40.4],["CHP-906","DESCARGADO",13090.0,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-16",38.15,37.4],["CHP-915","DESCARGADO",9334.5,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-16",27.17,26.67],["CHP-916","DESCARGADO",12785.5,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-16",37.96,36.53],["BZJ-770","DESCARGADO",14185.5,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-16",42.09,40.53],["BUM-712","DESCARGADO",13849.5,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-16",41.51,39.57],["CHP-909","DESCARGADO",4729.91,"Mar","CONSUR TRADING S.A.C. - AREQUIPA","2026-03-16",36.44,36.52],["AYO-724","DESCARGADO",4517.04,"Mar","CONSUR TRADING S.A.C. - AREQUIPA","2026-03-16",34.8,34.87],["CHP-919","DESCARGADO",4300.27,"Mar","CONSUR TRADING S.A.C. - AREQUIPA","2026-03-16",33.13,33.2],["BEL-910","DESCARGADO",6789.25,"Mar","CONSUR TRADING S.A.C. - TRUJILLO","2026-03-17",35.96,35.98],["BEL-910","DESCARGADO",1892.1,"Mar","UNIÓN ANDINA DE CEEMENTOS S.A.A. (UNACEM)","2026-03-18",34.0,34.0],["AYO-724","DESCARGADO",5083.44,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-18",35.9,36.08],["CHP-909","DESCARGADO",5002.73,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-18",35.33,35.28],["CHP-919","DESCARGADO",5175.48,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-18",36.55,36.74],["CHP-910","DESCARGADO",13195.0,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-20",40.0,37.7],["CHP-911","DESCARGADO",13842.5,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-20",40.0,39.55],["CHP-918","DESCARGADO",15193.5,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-20",40.0,43.41],["CHP-905","DESCARGADO",13888.0,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-20",40.0,39.68],["CHP-908","DESCARGADO",14409.5,"Mar","CONSORCIO MACHUPICCHU GOLD - CONSORCIO GOLDMAC","2026-03-20",40.0,41.17],["BZJ-770","DESCARGADO",5130.17,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-22",36.23,36.17],["CHP-917","DESCARGADO",4992.82,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-22",35.26,35.2],["BEL-910","DESCARGADO",5159.9,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-22",36.44,36.56],["CHP-916","DESCARGADO",5205.22,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-22",36.76,36.93],["BUM-712","DESCARGADO",5067.86,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-22",35.79,35.93],["CHP-909","DESCARGADO",5186.81,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-22",36.63,36.81],["AYO-724","DESCARGADO",5121.67,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-22",36.17,36.37],["CHP-906","DESCARGADO",5077.78,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-22",35.86,35.81],["CHP-919","DESCARGADO",5009.81,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-22",35.38,35.34],["BUI-896","DESCARGADO",4963.08,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-22",35.05,34.94],["CHP-915","DESCARGADO",5141.5,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-22",36.31,36.48],["CHP-910","DESCARGADO",4886.97,"Mar","CONSUR TRADING S.A.C. - AREQUIPA","2026-03-24",37.65,37.61],["CHP-911","DESCARGADO",4513.15,"Mar","CONSUR TRADING S.A.C. - AREQUIPA","2026-03-24",34.77,34.76],["BUM-712","EN RUTA",5032.46,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-25",35.54,0.0],["CHP-919","EN RUTA",5157.07,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-25",36.42,0.0],["CHP-905","EN RUTA",5131.58,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-25",36.24,0.0],["BZJ-770","EN RUTA",5140.08,"Mar","CONSUR TRADING S.A.C. - NASCA","2026-03-25",36.3,0.0]],"t":[[300.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[300.0,"Feb"],[300.0,"Feb"],[300.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[300.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[300.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Feb"],[350.0,"Mar"],[350.0,"Mar"],[350.0,"Mar"],[350.0,"Mar"],[350.0,"Mar"],[350.0,"Mar"],[350.0,"Mar"],[350.0,"Mar"],[350.0,"Mar"],[350.0,"Mar"],[350.0,"Mar"],[100000.0,"Mar"]]};
+const MS=['Ene','Feb','Mar'];
+let cM='Todos',cD='';
+const CH={};
+Chart.defaults.color='#64748b';Chart.defaults.borderColor='rgba(255,255,255,0.04)';Chart.defaults.font.family="'DM Sans',sans-serif";
+const TP={backgroundColor:'#1e293b',titleColor:'#fff',bodyColor:'#94a3b8',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,cornerRadius:8,padding:10};
+const GY={color:'rgba(255,255,255,0.04)'};const NG={display:false};
+const CL=['#3b82f6','#10b981','#f59e0b','#ef4444','#6366f1','#06b6d4','#ec4899','#f97316','#14b8a6','#8b5cf6'];
+
+// NAV
+document.querySelectorAll('.nav-item').forEach(n=>n.addEventListener('click',()=>{
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));n.classList.add('active');
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+n.dataset.tab).classList.add('active');
+  const titles={general:['Resumen General','Indicadores globales con comparativo mensual'],programacion:['Programaciones','Viajes programados y estado de ejecución'],costos:['Costo / Facturación','Análisis de costos por unidad y cliente'],incidentes:['Incidentes','Registro y seguimiento de incidentes'],operaciones:['Continuidad Operativa','Reportes operativos y semáforo']};
+  const t=titles[n.dataset.tab]||['',''];document.getElementById('pageTitle').textContent=t[0];document.getElementById('pageDesc').textContent=t[1];
+}));
+
+function setM(m,el){cM=m;cD='';document.getElementById('dF').value='';document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active'));el.classList.add('active');document.getElementById('periodBadge').textContent=m==='Todos'?'Enero — Marzo 2026':m+' 2026';render()}
+function setD(d){if(!d)return;cD=d;cM='__d';document.querySelectorAll('.filters .fbtn').forEach(b=>b.classList.remove('active'));document.getElementById('periodBadge').textContent=d;render()}
+function clearD(){cD='';document.getElementById('dF').value='';cM='Todos';document.querySelectorAll('.filters .fbtn').forEach(b=>b.classList.remove('active'));document.querySelector('.filters .fbtn').classList.add('active');document.getElementById('periodBadge').textContent='Enero — Marzo 2026';render()}
+
+function fR(a){if(cD)return a.filter(r=>r[5]===cD);if(cM==='Todos'||cM==='__d')return a;return a.filter(r=>r[0]===cM)}
+function fO(a,k){if(cD)return a.filter(r=>r[k]&&r[k].startsWith&&r[k].startsWith(cD));if(cM==='Todos'||cM==='__d')return a;return a.filter(r=>r[k]===cM)}
+function fP(a){if(cD)return a.filter(r=>r.fs&&r.fs===cD);if(cM==='Todos'||cM==='__d')return a;return a.filter(r=>r.m===cM)}
+function fC(a){if(cD)return a.filter(r=>r[5]===cD);if(cM==='Todos'||cM==='__d')return a;return a.filter(r=>r[3]===cM)}
+function cnt(a,i,v){return a.filter(r=>r[i]===v).length}
+function cntBy(a,i){const m={};a.forEach(r=>{const k=r[i]||'';if(k)m[k]=(m[k]||0)+1});return m}
+function mc(id,cfg){if(CH[id])CH[id].destroy();CH[id]=new Chart(document.getElementById(id),cfg)}
+function kpi(id,items){document.getElementById(id).innerHTML=items.map(k=>'<div class="kc '+k[2]+'"><div class="kc-label">'+k[0]+'</div><div class="kc-value">'+k[1]+'</div><div class="kc-sub">'+k[3]+'</div></div>').join('')}
+
+function render(){
+const reg=fR(D.r);
+const total=reg.length,comp=cnt(reg,1,'DESCARGADO'),enr=cnt(reg,1,'EN RUTA');
+const at=cnt(reg,2,'A TIEMPO'),antt=cnt(reg,2,'ANTICIPADO'),ret=cnt(reg,2,'RETRASADO');
+const onTime=at+antt;
+const wC=reg.filter(r=>r[7]!=null&&r[8]!=null);
+const inF=wC.filter(r=>r[8]>=r[7]).length;
+const inFPct=wC.length>0?Math.round(inF/wC.length*1000)/10:0;
+const otifBoth=wC.filter(r=>(r[2]==='A TIEMPO'||r[2]==='ANTICIPADO')&&r[8]>=r[7]).length;
+const otifPct=total>0?Math.round(otifBoth/total*1000)/10:0;
+
+// Cost
+const cost=fC(D.c);
+const cTot=cost.reduce((s,r)=>s+r[2],0);
+const cFeb=D.c.filter(r=>r[3]==='Feb').reduce((s,r)=>s+r[2],0);
+const cMar=D.c.filter(r=>r[3]==='Mar').reduce((s,r)=>s+r[2],0);
+const cGrowth=cFeb>0?Math.round((cTot-cFeb)/cFeb*100):0;
+
+// Avg time
+const withT=reg.filter(r=>r[4]!=null);
+const avgT=withT.length>0?(withT.reduce((s,r)=>s+r[4],0)/withT.length):0;
+const avgByM={};MS.forEach(m=>{const mr=D.r.filter(r=>r[0]===m&&r[4]!=null);avgByM[m]=mr.length>0?mr.reduce((s,r)=>s+r[4],0)/mr.length:0});
+
+// OTIF pcts by month
+const otifByM={};MS.forEach(m=>{const mr=D.r.filter(r=>r[0]===m);const c2=mr.filter(r=>r[1]==='DESCARGADO').length;const ot=mr.filter(r=>r[2]==='A TIEMPO'||r[2]==='ANTICIPADO').length;otifByM[m]=c2>0?Math.round(ot/c2*1000)/10:0});
+const antByM={};MS.forEach(m=>{const mr=D.r.filter(r=>r[0]===m);const c2=mr.filter(r=>r[1]==='DESCARGADO').length;const a=mr.filter(r=>r[2]==='ANTICIPADO').length;antByM[m]=c2>0?Math.round(a/c2*1000)/10:0});
+const retByM={};MS.forEach(m=>{const mr=D.r.filter(r=>r[0]===m);const c2=mr.filter(r=>r[1]==='DESCARGADO').length;const re=mr.filter(r=>r[2]==='RETRASADO').length;retByM[m]=c2>0?Math.round(re/c2*1000)/10:0});
+
+const otifAll=comp>0?Math.round(onTime/comp*1000)/10:0;
+const antAll=comp>0?Math.round(antt/comp*1000)/10:0;
+const retAll=comp>0?Math.round(ret/comp*1000)/10:0;
+
+document.getElementById('totalF').textContent=D.r.length;
+
+// ═══ GENERAL KPIs ═══
+kpi('kG1',[
+  ['Monto Facturado','S/ '+(cTot>0?(cTot).toLocaleString('es-PE',{maximumFractionDigits:0}):'0'),'blue','<b class="g">▲ +'+(cGrowth>0?cGrowth:0)+'%</b> &nbsp;Feb S/'+(cFeb/1000).toFixed(0)+'K → Mar S/'+(cMar/1000).toFixed(0)+'K'],
+  ['Total Viajes Registrados',total,'green','<b class="b">▲ Ene '+cnt(D.r,0,'Ene')+'</b> &nbsp;<b class="g">■ Feb '+cnt(D.r,0,'Feb')+'</b> &nbsp;<b class="r">▼ Mar '+cnt(D.r,0,'Mar')+'</b>'],
+  ['Tiempo Promedio por Viaje','<span style="font-size:1.6rem">'+avgT.toFixed(1)+' h</span>','purple','Ene <b>'+avgByM.Ene.toFixed(1)+'h</b> &nbsp;Feb <b>'+avgByM.Feb.toFixed(1)+'h</b> &nbsp;Mar <b>'+avgByM.Mar.toFixed(1)+'h</b>']
+]);
+// OTIF% by month (a tiempo+completo / total viajes)
+const otifByMes={};MS.forEach(m=>{const mr=D.r.filter(r=>r[0]===m);const mt=mr.filter(r=>r[1]==='DESCARGADO').length;const wc=mr.filter(r=>r[7]!=null&&r[8]!=null);const b=wc.filter(r=>(r[2]==='A TIEMPO'||r[2]==='ANTICIPADO')&&r[8]>=r[7]).length;otifByMes[m]=mt>0?Math.round(b/mt*1000)/10:0});
+
+kpi('kG2',[
+  ['Entregas a Tiempo (On Time)',otifAll+'%','green','Ene <b class="g">'+otifByM.Ene+'%</b> &nbsp;Feb <b class="g">'+otifByM.Feb+'%</b> &nbsp;Mar <b class="g">'+otifByM.Mar+'%</b>'],
+  ['OTIF % (A Tiempo + Completo)',otifPct+'%','cyan','<b>'+otifBoth+' de '+total+' viajes</b> &nbsp; Ene <b>'+otifByMes.Ene+'%</b> Feb <b>'+otifByMes.Feb+'%</b> Mar <b>'+otifByMes.Mar+'%</b>'],
+  ['Entregas Retrasadas',retAll+'%','red','Ene <b class="r">'+retByM.Ene+'%</b> &nbsp;Feb <b class="r">'+retByM.Feb+'%</b> &nbsp;Mar <b class="r">'+retByM.Mar+'%</b>']
+]);
+
+// Charts
+const mD=MS.map(m=>{const mr=D.r.filter(r=>r[0]===m);return{m,at:cnt(mr,2,'A TIEMPO'),ant:cnt(mr,2,'ANTICIPADO'),ret:cnt(mr,2,'RETRASADO')}});
+mc('gC1',{type:'bar',data:{labels:mD.map(d=>({Ene:'Enero',Feb:'Febrero',Mar:'Marzo'}[d.m])),datasets:[{label:'A Tiempo',data:mD.map(d=>d.at),backgroundColor:'rgba(16,185,129,0.75)',borderRadius:4},{label:'Anticipado',data:mD.map(d=>d.ant),backgroundColor:'rgba(99,102,241,0.7)',borderRadius:4},{label:'Retrasado',data:mD.map(d=>d.ret),backgroundColor:'rgba(239,68,68,0.7)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{padding:14,usePointStyle:true,pointStyle:'rect',font:{size:11}}},tooltip:TP},scales:{y:{beginAtZero:true,stacked:true,grid:GY},x:{stacked:true,grid:NG}}}});
+
+mc('gC2',{type:'doughnut',data:{labels:['A Tiempo '+otifAll+'% ('+at+')','Anticipado '+antAll+'% ('+antt+')','Retrasado '+retAll+'% ('+ret+')'],datasets:[{data:[at,antt,ret],backgroundColor:['#10b981','#3b82f6','#ef4444'],borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{padding:12,usePointStyle:true,pointStyle:'circle',font:{size:11}}},tooltip:TP}}});
+
+mc('gC3',{type:'line',data:{labels:MS.map(m=>({Ene:'Enero',Feb:'Febrero',Mar:'Marzo'}[m])),datasets:[{label:'Horas promedio',data:MS.map(m=>Math.round(avgByM[m]*10)/10),borderColor:'var(--cyan)',backgroundColor:'rgba(6,182,212,0.08)',fill:true,tension:0.4,pointRadius:6,pointBackgroundColor:'var(--cyan)',borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TP,callbacks:{label:c=>c.parsed.y+'h'}}},scales:{y:{grid:GY,ticks:{callback:v=>v+'h'}},x:{grid:NG}}}});
+
+// Clients from programacion
+const clC={};D.p.forEach(x=>{let k=x.cl;if(k.includes('NASCA')&&k.includes('CONSUR'))k='Consur Nasca';else if(k.includes('GOLDMAC')||k.includes('MACHUPICCHU'))k='Consorcio Goldmac';else if(k.includes('UNACEM'))k='UNACEM';else if(k.includes('AREQUIPA'))k='Consur Arequipa';else if(k.includes('ABANCAY'))k='Consur Abancay';else if(k.includes('TRUJILLO'))k='Consur Trujillo';else k=k.substring(0,20);clC[k]=(clC[k]||0)+1});
+const clS=Object.entries(clC).sort((a,b)=>b[1]-a[1]);
+mc('gC4',{type:'bar',data:{labels:clS.map(e=>e[0]),datasets:[{data:clS.map(e=>e[1]),backgroundColor:CL,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TP,callbacks:{label:c=>c.parsed.x+' viajes'}}},scales:{x:{beginAtZero:true,grid:GY},y:{grid:NG,ticks:{font:{size:11}}}}}});
+
+// OTIF by month
+const otifLn=MS.map(m=>{const mr=D.r.filter(r=>r[0]===m);const mt=mr.filter(r=>r[1]==='DESCARGADO').length;const wc=mr.filter(r=>r[7]!=null&&r[8]!=null);const b=wc.filter(r=>(r[2]==='A TIEMPO'||r[2]==='ANTICIPADO')&&r[8]>=r[7]).length;return mt>0?Math.round(b/mt*100):0});
+const otLn=MS.map(m=>{const mr=D.r.filter(r=>r[0]===m&&r[1]==='DESCARGADO');const ot=mr.filter(r=>r[2]==='A TIEMPO'||r[2]==='ANTICIPADO').length;return mr.length>0?Math.round(ot/mr.length*100):0});
+const ifLn=MS.map(m=>{const mr=D.r.filter(r=>r[0]===m);const wc=mr.filter(r=>r[7]!=null&&r[8]!=null);const inf=wc.filter(r=>r[8]>=r[7]).length;return wc.length>0?Math.round(inf/wc.length*100):0});
+
+mc('gC5',{type:'bar',data:{labels:MS.map(m=>({Ene:'Enero',Feb:'Febrero',Mar:'Marzo'}[m])),datasets:[
+  {label:'On Time %',data:otLn,backgroundColor:'rgba(16,185,129,0.65)',borderRadius:6},
+  {label:'In Full %',data:ifLn,backgroundColor:'rgba(6,182,212,0.65)',borderRadius:6},
+  {label:'OTIF% (A Tiempo & Completo / Total)',data:otifLn,type:'line',borderColor:'#f59e0b',backgroundColor:'transparent',pointRadius:5,pointBackgroundColor:'#f59e0b',borderWidth:2,tension:0.3}
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{padding:12,usePointStyle:true,pointStyle:'circle',font:{size:11}}},tooltip:{...TP,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y+'%'}}},scales:{y:{beginAtZero:true,max:100,grid:GY,ticks:{callback:v=>v+'%'}},x:{grid:NG}}}});
+
+const dem={};reg.forEach(r=>{if(r[3]&&r[3]!=='SIN DEMORA'&&r[3]!=='')dem[r[3]]=(dem[r[3]]||0)+1});
+const dK=Object.keys(dem),dV=dK.map(k=>dem[k]);
+mc('gC6',{type:'bar',data:{labels:dK.length?dK:['Sin demoras'],datasets:[{data:dK.length?dV:[0],backgroundColor:CL.slice(3),borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:TP},scales:{x:{beginAtZero:true,grid:GY},y:{grid:NG}}}});
+
+// ═══ PROGRAMACIONES ═══
+const prg=fP(D.p);const pt=prg.length,pe=prg.filter(r=>r.e==='EJECUTADO').length,pn=prg.filter(r=>r.e==='NO EJECUTADO').length;
+const pp=prg.filter(r=>r.es==='PROGRAMADO'||r.e==='NO EJECUTADO');
+const ppct=pt>0?Math.round(pe/pt*1000)/10:0;
+kpi('kP',[['Total Programados',pt,'blue','Viajes'],['Ejecutados',pe,'green','Completados'],['No Ejecutados',pn,'red','Sin completar'],['Pendientes',pp.length,'orange','Por ejecutar'],['% Ejecución',ppct+'%','purple','Ejecutados/Total']]);
+document.getElementById('pendN').textContent='('+pp.length+' pendientes)';
+
+const pmD=MS.map(m=>D.p.filter(r=>r.m===m).length);
+mc('pC1',{type:'bar',data:{labels:MS.map(m=>({Ene:'Enero',Feb:'Febrero',Mar:'Marzo'}[m])),datasets:[{label:'Programados',data:pmD,backgroundColor:'rgba(99,102,241,0.7)',borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:TP},scales:{y:{beginAtZero:true,grid:GY},x:{grid:NG}}}});
+mc('pC2',{type:'doughnut',data:{labels:['Ejecutados','No Ejecutados'],datasets:[{data:[pe,pn],backgroundColor:['#10b981','#ef4444'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{padding:16,usePointStyle:true,pointStyle:'circle'}},tooltip:TP}}});
+document.getElementById('pTB').innerHTML=pp.map(r=>'<tr><td>'+r.c+'</td><td class="mono">'+r.t+'</td><td>'+r.cl.substring(0,35)+'</td><td>'+r.o+'</td><td>'+r.d+'</td><td>'+r.fs+'</td><td class="mono" style="color:var(--accent)">'+r.ir+'</td><td><span class="pill pill-yellow">'+r.e+'</span></td></tr>').join('');
+
+// ═══ COSTOS ═══
+const co=fC(D.c);const coT=co.reduce((s,r)=>s+r[2],0);const coD=co.filter(r=>r[1]==='DESCARGADO').length;const coR=co.filter(r=>r[1]==='EN RUTA').length;
+const tr=fO(D.t,1);const trT=tr.reduce((s,r)=>s+r[0],0);
+kpi('kCo',[['Total Facturado','S/. '+(coT/1000).toFixed(1)+'K','blue','Transporte'],['Traslados Int.','S/. '+(trT/1000).toFixed(1)+'K','green','Internos'],['Viajes Facturados',co.length,'purple','Con costo'],['Completados',coD,'orange','Descargados'],['En Ruta',coR,'teal','En tránsito']]);
+
+const cmC={};co.forEach(r=>{cmC[r[3]]=(cmC[r[3]]||0)+r[2]});
+const cmL=MS.filter(m=>cmC[m]);
+mc('coC1',{type:'bar',data:{labels:cmL.length?cmL:['Sin datos'],datasets:[{data:cmL.length?cmL.map(m=>Math.round(cmC[m]||0)):[0],backgroundColor:'rgba(59,130,246,0.7)',borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TP,callbacks:{label:c=>'S/. '+c.parsed.y.toLocaleString('es-PE')}}},scales:{y:{beginAtZero:true,grid:GY,ticks:{callback:v=>'S/.'+(v/1000).toFixed(0)+'K'}},x:{grid:NG}}}});
+
+const clCo={};co.forEach(r=>{let cl=r[4];if(cl.length>30)cl=cl.substring(0,30)+'...';clCo[cl]=(clCo[cl]||0)+r[2]});
+const clCoS=Object.entries(clCo).sort((a,b)=>b[1]-a[1]).slice(0,8);
+mc('coC2',{type:'bar',data:{labels:clCoS.map(e=>e[0]),datasets:[{data:clCoS.map(e=>Math.round(e[1])),backgroundColor:'rgba(6,182,212,0.6)',borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TP,callbacks:{label:c=>'S/. '+c.parsed.x.toLocaleString('es-PE')}}},scales:{x:{beginAtZero:true,grid:GY,ticks:{callback:v=>'S/.'+(v/1000).toFixed(0)+'K'}},y:{grid:NG,ticks:{font:{size:9}}}}}});
+
+const cuC={};co.forEach(r=>{cuC[r[0]]=(cuC[r[0]]||0)+r[2]});
+const cuS=Object.entries(cuC).sort((a,b)=>b[1]-a[1]);
+mc('coC3',{type:'bar',data:{labels:cuS.map(e=>e[0]),datasets:[{data:cuS.map(e=>Math.round(e[1])),backgroundColor:'rgba(16,185,129,0.6)',borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TP,callbacks:{label:c=>'S/. '+c.parsed.x.toLocaleString('es-PE')}}},scales:{x:{beginAtZero:true,grid:GY,ticks:{callback:v=>'S/.'+(v/1000).toFixed(0)+'K'}},y:{grid:NG,ticks:{font:{size:11}}}}}});
+
+mc('coC4',{type:'doughnut',data:{labels:['Descargado','En Ruta'],datasets:[{data:[coD,coR],backgroundColor:['#10b981','#f59e0b'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{padding:12,usePointStyle:true,pointStyle:'circle'}},tooltip:TP}}});
+
+const tmC={};tr.forEach(r=>{tmC[r[1]]=(tmC[r[1]]||0)+r[0]});
+const tmL=MS.filter(m=>tmC[m]);
+mc('coC5',{type:'bar',data:{labels:tmL.length?tmL:['Sin datos'],datasets:[{data:tmL.length?tmL.map(m=>Math.round(tmC[m]||0)):[0],backgroundColor:'rgba(99,102,241,0.7)',borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TP,callbacks:{label:c=>'S/. '+c.parsed.y.toLocaleString('es-PE')}}},scales:{y:{beginAtZero:true,grid:GY,ticks:{callback:v=>'S/.'+(v/1000).toFixed(0)+'K'}},x:{grid:NG}}}});
+
+// ═══ INCIDENTES ═══
+const inc=fO(D.i,8);const iT=inc.length,iA=inc.filter(r=>r[6]==='ALTA').length,iM=inc.filter(r=>r[6]==='MEDIA').length;
+const iCl=inc.filter(r=>r[7]==='CERRADO').length;const iPct=iT>0?Math.round(iCl/iT*1000)/10:0;
+kpi('kI',[['Total Incidentes',iT,'red','En el periodo'],['Severidad Alta',iA,'orange','Urgentes'],['Severidad Media',iM,'blue','Moderados'],['% Cerrados',iPct+'%','green','Cierre']]);
+
+const iTp=cntBy(inc,4),iUn=cntBy(inc,2);
+mc('iC1',{type:'bar',data:{labels:Object.keys(iTp).map(k=>k.length>25?k.substring(0,25)+'...':k),datasets:[{data:Object.values(iTp),backgroundColor:CL,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:TP},scales:{x:{beginAtZero:true,grid:GY,ticks:{stepSize:1}},y:{grid:NG,ticks:{font:{size:10}}}}}});
+const imD=MS.map(m=>D.i.filter(r=>r[8]===m).length);
+mc('iC2',{type:'bar',data:{labels:MS,datasets:[{data:imD,backgroundColor:imD.map(v=>v>=4?'rgba(239,68,68,0.7)':'rgba(245,158,11,0.7)'),borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:TP},scales:{y:{beginAtZero:true,grid:GY,ticks:{stepSize:1}},x:{grid:NG}}}});
+mc('iC3',{type:'bar',data:{labels:Object.keys(iUn),datasets:[{data:Object.values(iUn),backgroundColor:'rgba(59,130,246,0.7)',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:TP},scales:{y:{beginAtZero:true,grid:GY,ticks:{stepSize:1}},x:{grid:NG}}}});
+mc('iC4',{type:'doughnut',data:{labels:['Alta','Media'],datasets:[{data:[iA,iM],backgroundColor:['#ef4444','#f59e0b'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{padding:16,usePointStyle:true,pointStyle:'circle'}},tooltip:TP}}});
+document.getElementById('iTB').innerHTML=inc.map(r=>{const sv=r[6]==='ALTA'?'pill-red':'pill-yellow';const st=r[7]==='CERRADO'?'pill-green':'pill-red';return'<tr><td class="mono" style="color:var(--accent)">'+r[0]+'</td><td>'+r[1]+'</td><td class="mono">'+r[2]+'</td><td>'+r[3]+'</td><td>'+r[4]+'</td><td style="white-space:normal;max-width:180px">'+r[5]+'</td><td><span class="pill '+sv+'">'+r[6]+'</span></td><td><span class="pill '+st+'">'+r[7]+'</span></td></tr>'}).join('');
+
+// ═══ OPERACIONES ═══
+const oti=fO(D.o,6);const oT=oti.length,oAt=oti.filter(r=>r[5]==='ENVIADO A TIEMPO').length,oPe=oT-oAt;
+const oPct=oT>0?Math.round(oAt/oT*100):0;
+kpi('kOp',[['Total Reportes',oT,'blue','Operativos'],['Enviados a Tiempo',oAt,'green','Cumplimiento'],['Pendientes',oPe,'orange','Sin enviar'],['% Cumplimiento',oPct+'%','purple','A tiempo']]);
+
+const cmS={};MS.forEach(m=>{const mr=D.r.filter(r=>r[0]===m);const t2=mr.filter(r=>r[2]).length;const a2=cnt(mr,2,'A TIEMPO'),re2=cnt(mr,2,'RETRASADO'),an2=cnt(mr,2,'ANTICIPADO');cmS[m]={at:a2,ret:re2,ant:an2,total:t2,pct:t2>0?Math.round(a2/t2*1000)/10:0}});
+const sMs=cM==='Todos'||cM==='__d'?MS:[cM];
+let sH='<div class="sem-grid">';
+sMs.forEach(m=>{const d=cmS[m];const pA=d.pct,pR=d.total>0?Math.round(d.ret/d.total*100):0,pAn=d.total>0?Math.round(d.ant/d.total*100):0;
+  const cA=pA>=75?'sem-green':pA>=50?'sem-yellow':'sem-red';
+  const cR=pR<=5?'sem-green':pR<=15?'sem-yellow':'sem-red';
+  sH+='<div class="sem-card"><h4>'+m+' 2026</h4>';
+  sH+='<div class="sem-row '+cA+'"><span class="sem-dot" style="background:currentColor"></span> A Tiempo: '+pA+'% <span style="font-size:0.65rem;color:var(--muted)">('+d.at+'/'+d.total+')</span></div><div class="pbar"><div class="pbar-fill" style="width:'+pA+'%;background:'+(pA>=75?'#10b981':'#f59e0b')+'"></div></div>';
+  sH+='<div class="sem-row sem-green"><span class="sem-dot" style="background:currentColor"></span> Anticipado: '+pAn+'% <span style="font-size:0.65rem;color:var(--muted)">('+d.ant+'/'+d.total+')</span></div><div class="pbar"><div class="pbar-fill" style="width:'+pAn+'%;background:#6366f1"></div></div>';
+  sH+='<div class="sem-row '+cR+'"><span class="sem-dot" style="background:currentColor"></span> Retrasado: '+pR+'% <span style="font-size:0.65rem;color:var(--muted)">('+d.ret+'/'+d.total+')</span></div><div class="pbar"><div class="pbar-fill" style="width:'+Math.max(pR,2)+'%;background:'+(pR<=5?'#10b981':'#ef4444')+'"></div></div></div>'});
+sH+='</div>';document.getElementById('semC').innerHTML=sH;
+
+mc('oC1',{type:'bar',data:{labels:sMs,datasets:[{label:'% A Tiempo',data:sMs.map(m=>cmS[m].pct),backgroundColor:'rgba(16,185,129,0.7)',borderRadius:6},{label:'% Retrasado',data:sMs.map(m=>cmS[m].total>0?Math.round(cmS[m].ret/cmS[m].total*100):0),backgroundColor:'rgba(239,68,68,0.7)',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{padding:12,usePointStyle:true,pointStyle:'circle'}},tooltip:{...TP,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y+'%'}}},scales:{y:{beginAtZero:true,max:100,grid:GY,ticks:{callback:v=>v+'%'}},x:{grid:NG}}}});
+mc('oC2',{type:'doughnut',data:{labels:['Enviado a Tiempo','Pendiente'],datasets:[{data:[oAt,oPe],backgroundColor:['#10b981','#f59e0b'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{padding:16,usePointStyle:true,pointStyle:'circle'}},tooltip:TP}}});
+document.getElementById('oTB').innerHTML=oti.map(r=>{const b=r[5]==='ENVIADO A TIEMPO'?'pill-green':'pill-yellow';const l=r[5]==='-'?'PENDIENTE':r[5];return'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td><td>'+r[3]+'</td><td>'+(r[4]||'-')+'</td><td><span class="pill '+b+'">'+l+'</span></td></tr>'}).join('');
 }
-
-Chart.defaults.color = '#777';
-Chart.defaults.font.size = 10;
-const gridColor = 'rgba(255,255,255,0.05)';
-
-function initCharts(id) {
-  if(id==='general') {
-    new Chart(document.getElementById('g-viajes'), {
-      type:'bar',
-      data:{
-        labels:['Enero','Febrero','Marzo'],
-        datasets:[
-          {label:'A Tiempo',   data:[50,71,46], backgroundColor:'#4ecf8a', stack:'s'},
-          {label:'Anticipado', data:[13,16,15], backgroundColor:'#5aabf0', stack:'s'},
-          {label:'Retrasado',  data:[2,8,0],   backgroundColor:'#e05555', stack:'s'}
-        ]
-      },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-        scales:{x:{grid:{color:gridColor}},y:{grid:{color:gridColor}}}}
-    });
-    new Chart(document.getElementById('g-donut'), {
-      type:'doughnut',
-      data:{labels:['A Tiempo','Anticipado','Retrasado'],
-        datasets:[{data:[167,44,10],backgroundColor:['#4ecf8a','#5aabf0','#e05555'],borderWidth:0}]},
-      options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false}}}
-    });
-    new Chart(document.getElementById('g-tiempo'), {
-      type:'line',
-      data:{
-        labels:['Enero','Febrero','Marzo'],
-        datasets:[{label:'Horas promedio',data:[22.1,26.8,20.6],
-          borderColor:'#2ecfcf',backgroundColor:'rgba(46,207,207,0.1)',
-          tension:0.3,pointRadius:5,pointBackgroundColor:'#2ecfcf',fill:true}]
-      },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-        scales:{x:{grid:{color:gridColor}},
-          y:{grid:{color:gridColor},ticks:{callback:v=>v+'h'}}}}
-    });
-  }
-  if(id==='programacion') {
-    new Chart(document.getElementById('p-ejec'), {
-      type:'bar',
-      data:{
-        labels:['Enero','Febrero','Marzo'],
-        datasets:[
-          {label:'Programados', data:[28,95,75], backgroundColor:'rgba(124,111,232,0.5)', borderColor:'#7c6fe8', borderWidth:1},
-          {label:'Ejecutados',  data:[28,95,72], backgroundColor:'#4ecf8a'},
-          {label:'No Ejecut.', data:[0,0,3],   backgroundColor:'#e05555'}
-        ]
-      },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-        scales:{x:{grid:{color:gridColor}},y:{grid:{color:gridColor}}}}
-    });
-  }
-  if(id==='costos') {
-    new Chart(document.getElementById('c-mensual'), {
-      type:'bar',
-      data:{
-        labels:['Febrero 2026','Marzo 2026'],
-        datasets:[
-          {label:'Viajes externos',    data:[847089,547238], backgroundColor:'#7c6fe8'},
-          {label:'Traslados internos', data:[10900,103850],  backgroundColor:'#4ecf8a'}
-        ]
-      },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-        scales:{x:{grid:{color:gridColor}},
-          y:{grid:{color:gridColor},ticks:{callback:v=>'S/'+Math.round(v/1000)+'K'}}}}
-    });
-    new Chart(document.getElementById('c-cliente-donut'), {
-      type:'doughnut',
-      data:{
-        labels:['Goldmac','Consur Nasca','Consur Abancay','Consur Arequipa','Consur Trujillo','UNACEM'],
-        datasets:[{data:[892955,409841,32948,27949,26847,3786],
-          backgroundColor:['#7c6fe8','#5aabf0','#e0a84c','#4ecf8a','#e05555','#2ecfcf'],borderWidth:0}]
-      },
-      options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false}}}
-    });
-  }
-  if(id==='incidentes') {
-    new Chart(document.getElementById('i-donut'), {
-      type:'doughnut',
-      data:{labels:['Alta','Media'],
-        datasets:[{data:[5,4],backgroundColor:['#e05555','#e0a84c'],borderWidth:0}]},
-      options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false}}}
-    });
-  }
-  if(id==='continuidad') {
-    new Chart(document.getElementById('co-bar'), {
-      type:'bar',
-      data:{
-        labels:['Febrero 2026','Marzo 2026'],
-        datasets:[
-          {label:'Con Continuidad', data:[81,68], backgroundColor:'#4ecf8a'},
-          {label:'Sin Continuidad', data:[14,7],  backgroundColor:'#e05555'}
-        ]
-      },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-        scales:{x:{grid:{color:gridColor}},y:{grid:{color:gridColor}}}}
-    });
-    new Chart(document.getElementById('co-line'), {
-      type:'line',
-      data:{
-        labels:['Febrero 2026','Marzo 2026'],
-        datasets:[
-          {label:'% Continuidad',data:[85.3,90.7],
-            borderColor:'#4ecf8a',backgroundColor:'rgba(78,207,138,0.1)',
-            tension:0.3,pointRadius:6,pointBackgroundColor:'#4ecf8a',fill:true},
-          {label:'% Sin Cont.',data:[14.7,9.3],
-            borderColor:'#e05555',backgroundColor:'rgba(224,85,85,0.08)',
-            tension:0.3,pointRadius:6,pointBackgroundColor:'#e05555',fill:true}
-        ]
-      },
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-        scales:{x:{grid:{color:gridColor}},
-          y:{grid:{color:gridColor},min:0,max:100,ticks:{callback:v=>v+'%'}}}}
-    });
-  }
-}
-
-// Init first page
-window.chartsInit = {general:true};
-initCharts('general');
+render();
 </script>
 </body>
 </html>
