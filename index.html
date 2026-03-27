@@ -133,13 +133,14 @@ tbody tr:hover td{background:rgba(59,130,246,0.04);color:var(--text)}
 <!-- GENERAL -->
 <div id="sec-general" class="section active">
   <div class="kpi-row cols3" id="kG1"></div>
+  <div class="kpi-row cols3" id="kG3"></div>
   <div class="kpi-row cols3" id="kG2"></div>
   <div class="cg c2">
     <div class="cp"><h3>Viajes por Mes — Estado de Entrega</h3><div class="cwrap"><canvas id="gC1"></canvas></div></div>
     <div class="cp"><h3>Distribución Global de Entregas</h3><div class="cwrap"><canvas id="gC2"></canvas></div></div>
   </div>
   <div class="cg c2">
-    <div class="cp"><h3>Tiempo Promedio por Viaje — Comparativo Mensual (hrs)</h3><div class="cwrap"><canvas id="gC3"></canvas></div></div>
+    <div class="cp"><h3>Carga Transportada vs Entregada por Mes (TN)</h3><div class="cwrap"><canvas id="gC3"></canvas></div></div>
     <div class="cp"><h3>Viajes por Cliente</h3><div class="cwrap"><canvas id="gC4"></canvas></div></div>
   </div>
   <div class="cg c2">
@@ -257,6 +258,8 @@ const cGrowth=cFeb>0?Math.round((cTot-cFeb)/cFeb*100):0;
 const withT=reg.filter(r=>r[4]!=null);
 const avgT=withT.length>0?(withT.reduce((s,r)=>s+r[4],0)/withT.length):0;
 const avgByM={};MS.forEach(m=>{const mr=D.r.filter(r=>r[0]===m&&r[4]!=null);avgByM[m]=mr.length>0?mr.reduce((s,r)=>s+r[4],0)/mr.length:0});
+const sumCT=reg.reduce((s,r)=>s+(r[7]||0),0);const sumCE=reg.reduce((s,r)=>s+(r[8]||0),0);const pctDifCT=sumCT>0?Math.round((sumCT-sumCE)/sumCT*1000)/10:0;
+const ctByM={},ceByM={},difByM={};MS.forEach(m=>{const mr=D.r.filter(r=>r[0]===m);ctByM[m]=Math.round(mr.reduce((s,r)=>s+(r[7]||0),0)*10)/10;ceByM[m]=Math.round(mr.reduce((s,r)=>s+(r[8]||0),0)*10)/10;difByM[m]=ctByM[m]>0?Math.round((ctByM[m]-ceByM[m])/ctByM[m]*1000)/10:0});
 
 // OTIF pcts by month
 const otifByM={};MS.forEach(m=>{const mr=D.r.filter(r=>r[0]===m);const c2=mr.filter(r=>r[1]==='DESCARGADO').length;const ot=mr.filter(r=>r[2]==='A TIEMPO'||r[2]==='ANTICIPADO').length;otifByM[m]=c2>0?Math.round(ot/c2*1000)/10:0});
@@ -275,6 +278,11 @@ kpi('kG1',[
   ['Total Viajes Registrados',total,'green','<b class="b">▲ Ene '+cnt(D.r,0,'Ene')+'</b> &nbsp;<b class="g">■ Feb '+cnt(D.r,0,'Feb')+'</b> &nbsp;<b class="r">▼ Mar '+cnt(D.r,0,'Mar')+'</b>'],
   ['Tiempo Promedio por Viaje','<span style="font-size:1.6rem">'+avgT.toFixed(1)+' h</span>','purple','Ene <b>'+avgByM.Ene.toFixed(1)+'h</b> &nbsp;Feb <b>'+avgByM.Feb.toFixed(1)+'h</b> &nbsp;Mar <b>'+avgByM.Mar.toFixed(1)+'h</b>']
 ]);
+kpi('kG3',[
+  ['Total Carga Transp.','<span style="font-size:1.6rem">'+sumCT.toLocaleString('es-PE',{maximumFractionDigits:1})+' TN</span>','cyan','Ene <b>'+ctByM.Ene+'</b> &nbsp;Feb <b>'+ctByM.Feb+'</b> &nbsp;Mar <b>'+ctByM.Mar+'</b> TN'],
+  ['Carga Entregada','<span style="font-size:1.6rem">'+sumCE.toLocaleString('es-PE',{maximumFractionDigits:1})+' TN</span>','green','Ene <b>'+ceByM.Ene+'</b> &nbsp;Feb <b>'+ceByM.Feb+'</b> &nbsp;Mar <b>'+ceByM.Mar+'</b> TN'],
+  ['% Dif. Carga','<span style="font-size:1.6rem">'+pctDifCT+'%</span>','red','Ene <b class="r">'+difByM.Ene+'%</b> &nbsp;Feb <b class="r">'+difByM.Feb+'%</b> &nbsp;Mar <b class="r">'+difByM.Mar+'%</b> &nbsp;(Transp−Entreg)/Transp']
+]);
 // OTIF% by month (a tiempo+completo / total viajes)
 const otifByMes={};MS.forEach(m=>{const mr=D.r.filter(r=>r[0]===m);const mt=mr.filter(r=>r[1]==='DESCARGADO').length;const wc=mr.filter(r=>r[7]!=null&&r[8]!=null);const b=wc.filter(r=>(r[2]==='A TIEMPO'||r[2]==='ANTICIPADO')&&r[8]>=r[7]).length;otifByMes[m]=mt>0?Math.round(b/mt*1000)/10:0});
 
@@ -290,7 +298,7 @@ mc('gC1',{type:'bar',data:{labels:mD.map(d=>({Ene:'Enero',Feb:'Febrero',Mar:'Mar
 
 mc('gC2',{type:'doughnut',data:{labels:['A Tiempo '+otifAll+'% ('+at+')','Anticipado '+antAll+'% ('+antt+')','Retrasado '+retAll+'% ('+ret+')'],datasets:[{data:[at,antt,ret],backgroundColor:['#10b981','#3b82f6','#ef4444'],borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{padding:12,usePointStyle:true,pointStyle:'circle',font:{size:11}}},tooltip:TP}}});
 
-mc('gC3',{type:'line',data:{labels:MS.map(m=>({Ene:'Enero',Feb:'Febrero',Mar:'Marzo'}[m])),datasets:[{label:'Horas promedio',data:MS.map(m=>Math.round(avgByM[m]*10)/10),borderColor:'var(--cyan)',backgroundColor:'rgba(6,182,212,0.08)',fill:true,tension:0.4,pointRadius:6,pointBackgroundColor:'var(--cyan)',borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TP,callbacks:{label:c=>c.parsed.y+'h'}}},scales:{y:{grid:GY,ticks:{callback:v=>v+'h'}},x:{grid:NG}}}});
+mc('gC3',{type:'bar',data:{labels:MS.map(m=>({Ene:'Enero',Feb:'Febrero',Mar:'Marzo'}[m])),datasets:[{label:'Transportada',data:MS.map(m=>ctByM[m]),backgroundColor:'rgba(6,182,212,0.65)',borderRadius:6},{label:'Entregada',data:MS.map(m=>ceByM[m]),backgroundColor:'rgba(16,185,129,0.65)',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{padding:12,usePointStyle:true,pointStyle:'circle',font:{size:11}}},tooltip:{...TP,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toLocaleString('es-PE')+' TN'}}},scales:{y:{beginAtZero:true,grid:GY},x:{grid:NG}}}});
 
 // Clients from programacion
 const clC={};D.p.forEach(x=>{let k=x.cl;if(k.includes('NASCA')&&k.includes('CONSUR'))k='Consur Nasca';else if(k.includes('GOLDMAC')||k.includes('MACHUPICCHU'))k='Consorcio Goldmac';else if(k.includes('UNACEM'))k='UNACEM';else if(k.includes('AREQUIPA'))k='Consur Arequipa';else if(k.includes('ABANCAY'))k='Consur Abancay';else if(k.includes('TRUJILLO'))k='Consur Trujillo';else k=k.substring(0,20);clC[k]=(clC[k]||0)+1});
