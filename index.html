@@ -177,62 +177,75 @@ const wC=reg.filter(r=>r[7]!=null&&r[8]!=null),inF=wC.filter(r=>r[8]>=r[7]).leng
 const otB=wC.filter(r=>(r[2]==='A TIEMPO'||r[2]==='ANTICIPADO')&&r[8]>=r[7]).length;
 const otP=tot>0?Math.round(otB/tot*1000)/10:0;
 const co=fCo(D.c),cTot=co.reduce((s,r)=>s+r[2],0);
-const cF=D.c.filter(r=>r[3]==='Feb').reduce((s,r)=>s+r[2],0),cMa=D.c.filter(r=>r[3]==='Mar').reduce((s,r)=>s+r[2],0);
 const wT=reg.filter(r=>r[4]!=null),aT=wT.length>0?wT.reduce((s,r)=>s+r[4],0)/wT.length:0;
-const aM={};MS.forEach(m=>{const mr=D.r.filter(r=>r[0]===m&&r[4]!=null);aM[m]=mr.length>0?mr.reduce((s,r)=>s+r[4],0)/mr.length:0});
-const oM={};MS.forEach(m=>{const mr=D.r.filter(r=>r[0]===m),c2=mr.filter(r=>r[1]==='DESCARGADO').length;oM[m]=c2>0?Math.round(mr.filter(r=>r[2]==='A TIEMPO'||r[2]==='ANTICIPADO').length/c2*1000)/10:0});
-const rM={};MS.forEach(m=>{const mr=D.r.filter(r=>r[0]===m),c2=mr.filter(r=>r[1]==='DESCARGADO').length;rM[m]=c2>0?Math.round(mr.filter(r=>r[2]==='RETRASADO').length/c2*1000)/10:0});
 const oA=comp>0?Math.round(onT/comp*1000)/10:0,rA=comp>0?Math.round(ret/comp*1000)/10:0;
-const oMes={};MS.forEach(m=>{const mr=D.r.filter(r=>r[0]===m),mt=mr.filter(r=>r[1]==='DESCARGADO').length,wc=mr.filter(r=>r[7]!=null&&r[8]!=null),b=wc.filter(r=>(r[2]==='A TIEMPO'||r[2]==='ANTICIPADO')&&r[8]>=r[7]).length;oMes[m]=mt>0?Math.round(b/mt*1000)/10:0});
 
-// Toneladas por unidad
+// Active months = only months present in filtered data
+const fMs=[...new Set(reg.map(r=>r[0]).filter(Boolean))];
+const aMs=MS.filter(m=>fMs.includes(m));
+const MN={Ene:'Enero',Feb:'Febrero',Mar:'Marzo',Abr:'Abril'};
+
+// Per-month stats from FILTERED data
+const aM={},oM={},rM={},oMes={};
+aMs.forEach(m=>{const mr=reg.filter(r=>r[0]===m&&r[4]!=null);aM[m]=mr.length>0?mr.reduce((s,r)=>s+r[4],0)/mr.length:0});
+aMs.forEach(m=>{const mr=reg.filter(r=>r[0]===m),c2=mr.filter(r=>r[1]==='DESCARGADO').length;oM[m]=c2>0?Math.round(mr.filter(r=>r[2]==='A TIEMPO'||r[2]==='ANTICIPADO').length/c2*1000)/10:0});
+aMs.forEach(m=>{const mr=reg.filter(r=>r[0]===m),c2=mr.filter(r=>r[1]==='DESCARGADO').length;rM[m]=c2>0?Math.round(mr.filter(r=>r[2]==='RETRASADO').length/c2*1000)/10:0});
+aMs.forEach(m=>{const mr=reg.filter(r=>r[0]===m),mt=mr.filter(r=>r[1]==='DESCARGADO').length,wc=mr.filter(r=>r[7]!=null&&r[8]!=null),b=wc.filter(r=>(r[2]==='A TIEMPO'||r[2]==='ANTICIPADO')&&r[8]>=r[7]).length;oMes[m]=mt>0?Math.round(b/mt*1000)/10:0});
+
 const tnU={};reg.forEach(r=>{if(r[7]!=null&&r[6])tnU[r[6]]=(tnU[r[6]]||0)+r[7]});
-const tnTotal=Object.values(tnU).reduce((s,v)=>s+v,0);
-
 document.getElementById('tF').textContent=D.r.length;
 
+const subKpi=aMs.map(m=>'<b>'+m+' '+((oM[m]||0))+'%</b>').join(' ');
+const subRet=aMs.map(m=>'<b class="r">'+m+' '+(rM[m]||0)+'%</b>').join(' ');
+const subOtif=aMs.map(m=>'<b>'+m+' '+(oMes[m]||0)+'%</b>').join(' ');
+const subTime=aMs.map(m=>'<b>'+m+' '+(aM[m]||0).toFixed(1)+'h</b>').join(' ');
+
 kp('kG1',[
-  ['Monto Facturado','S/ '+(cTot>0?cTot.toLocaleString('es-PE',{maximumFractionDigits:0}):'0'),'blue','Feb S/'+(cF/1000).toFixed(0)+'K — Mar S/'+(cMa/1000).toFixed(0)+'K'],
-  ['Total Viajes',tot,'green','<b class="b">Ene '+ct(D.r,0,'Ene')+'</b> <b class="g">Feb '+ct(D.r,0,'Feb')+'</b> <b>Mar '+ct(D.r,0,'Mar')+'</b>'],
-  ['Tiempo Promedio','<span style="font-size:1.6rem">'+aT.toFixed(1)+' h</span>','purple','Ene <b>'+aM.Ene.toFixed(1)+'h</b> Feb <b>'+aM.Feb.toFixed(1)+'h</b> Mar <b>'+aM.Mar.toFixed(1)+'h</b>']
+  ['Monto Facturado','S/ '+(cTot>0?cTot.toLocaleString('es-PE',{maximumFractionDigits:0}):'0'),'blue',co.length+' viajes facturados'],
+  ['Total Viajes',tot,'green',aMs.map(m=>'<b>'+m+' '+reg.filter(r=>r[0]===m).length+'</b>').join(' ')],
+  ['Tiempo Promedio','<span style="font-size:1.6rem">'+aT.toFixed(1)+' h</span>','purple',subTime]
 ]);
 kp('kG2',[
-  ['Entregas a Tiempo (On Time)',oA+'%','green','Ene <b class="g">'+oM.Ene+'%</b> Feb <b class="g">'+oM.Feb+'%</b> Mar <b class="g">'+oM.Mar+'%</b>'],
-  ['OTIF % (A Tiempo + Completo)',otP+'%','cyan','<b>'+otB+'/'+tot+' viajes</b> Ene <b>'+oMes.Ene+'%</b> Feb <b>'+oMes.Feb+'%</b> Mar <b>'+oMes.Mar+'%</b>'],
-  ['Entregas Retrasadas',rA+'%','red','Ene <b class="r">'+rM.Ene+'%</b> Feb <b class="r">'+rM.Feb+'%</b> Mar <b class="r">'+rM.Mar+'%</b>']
+  ['Entregas a Tiempo (On Time)',oA+'%','green',subKpi],
+  ['OTIF % (A Tiempo + Completo)',otP+'%','cyan','<b>'+otB+'/'+tot+' viajes</b> '+subOtif],
+  ['Entregas Retrasadas',rA+'%','red',subRet]
 ]);
 
-const mD=MS.map(m=>{const mr=D.r.filter(r=>r[0]===m);return{m,at:ct(mr,2,'A TIEMPO'),an:ct(mr,2,'ANTICIPADO'),re:ct(mr,2,'RETRASADO')}});
-mc('g1',{type:'bar',data:{labels:mD.map(d=>({Ene:'Enero',Feb:'Febrero',Mar:'Marzo',Abr:'Abril'}[d.m])),datasets:[{label:'A Tiempo',data:mD.map(d=>d.at),backgroundColor:'rgba(16,185,129,.75)',borderRadius:4},{label:'Anticipado',data:mD.map(d=>d.an),backgroundColor:'rgba(99,102,241,.7)',borderRadius:4},{label:'Retrasado',data:mD.map(d=>d.re),backgroundColor:'rgba(239,68,68,.7)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{padding:14,usePointStyle:true,pointStyle:'rect',font:{size:11}}},tooltip:TT},scales:{y:{beginAtZero:true,stacked:true,grid:GG},x:{stacked:true,grid:NN}}}});
+// CHARTS - use filtered months
+const mD=aMs.map(m=>{const mr=reg.filter(r=>r[0]===m);return{m,at:ct(mr,2,'A TIEMPO'),an:ct(mr,2,'ANTICIPADO'),re:ct(mr,2,'RETRASADO')}});
+mc('g1',{type:'bar',data:{labels:mD.map(d=>MN[d.m]),datasets:[{label:'A Tiempo',data:mD.map(d=>d.at),backgroundColor:'rgba(16,185,129,.75)',borderRadius:4},{label:'Anticipado',data:mD.map(d=>d.an),backgroundColor:'rgba(99,102,241,.7)',borderRadius:4},{label:'Retrasado',data:mD.map(d=>d.re),backgroundColor:'rgba(239,68,68,.7)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{padding:14,usePointStyle:true,pointStyle:'rect',font:{size:11}}},tooltip:TT},scales:{y:{beginAtZero:true,stacked:true,grid:GG},x:{stacked:true,grid:NN}}}});
 mc('g2',{type:'doughnut',data:{labels:['A Tiempo '+oA+'% ('+at+')','Anticipado ('+ant+')','Retrasado '+rA+'% ('+ret+')'],datasets:[{data:[at,ant,ret],backgroundColor:['#10b981','#3b82f6','#ef4444'],borderWidth:0,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{padding:12,usePointStyle:true,pointStyle:'circle',font:{size:11}}},tooltip:TT}}});
-mc('g3',{type:'line',data:{labels:MS.map(m=>({Ene:'Enero',Feb:'Febrero',Mar:'Marzo',Abr:'Abril'}[m])),datasets:[{data:MS.map(m=>Math.round(aM[m]*10)/10),borderColor:'#06b6d4',backgroundColor:'rgba(6,182,212,.08)',fill:true,tension:.4,pointRadius:6,pointBackgroundColor:'#06b6d4',borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>c.parsed.y+'h'}}},scales:{y:{grid:GG,ticks:{callback:v=>v+'h'}},x:{grid:NN}}}});
+mc('g3',{type:'line',data:{labels:aMs.map(m=>MN[m]),datasets:[{data:aMs.map(m=>Math.round((aM[m]||0)*10)/10),borderColor:'#06b6d4',backgroundColor:'rgba(6,182,212,.08)',fill:true,tension:.4,pointRadius:6,pointBackgroundColor:'#06b6d4',borderWidth:2.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>c.parsed.y+'h'}}},scales:{y:{grid:GG,ticks:{callback:v=>v+'h'}},x:{grid:NN}}}});
 
-const clC={};D.p.forEach(x=>{let k=x.cl;if(k.includes('NASCA')&&k.includes('CONSUR'))k='Consur Nasca';else if(k.includes('GOLDMAC')||k.includes('MACHUPICCHU'))k='Consorcio Goldmac';else if(k.includes('UNACEM'))k='UNACEM';else if(k.includes('AREQUIPA'))k='Consur Arequipa';else if(k.includes('ABANCAY'))k='Consur Abancay';else if(k.includes('TRUJILLO'))k='Consur Trujillo';else k=k.substring(0,20);clC[k]=(clC[k]||0)+1});
+// Viajes por cliente - from FILTERED programacion
+const fPr=fP(D.p);
+const clC={};fPr.forEach(x=>{let k=x.cl;if(k.includes('NASCA')&&k.includes('CONSUR'))k='Consur Nasca';else if(k.includes('GOLDMAC')||k.includes('MACHUPICCHU'))k='Consorcio Goldmac';else if(k.includes('UNACEM'))k='UNACEM';else if(k.includes('AREQUIPA'))k='Consur Arequipa';else if(k.includes('ABANCAY'))k='Consur Abancay';else if(k.includes('TRUJILLO'))k='Consur Trujillo';else k=k.substring(0,20);clC[k]=(clC[k]||0)+1});
 mc('g4',{type:'bar',data:{labels:Object.entries(clC).sort((a,b)=>b[1]-a[1]).map(e=>e[0]),datasets:[{data:Object.entries(clC).sort((a,b)=>b[1]-a[1]).map(e=>e[1]),backgroundColor:CC,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>c.parsed.x+' viajes'}}},scales:{x:{beginAtZero:true,grid:GG},y:{grid:NN,ticks:{font:{size:11}}}}}});
 
-const oL=MS.map(m=>{const mr=D.r.filter(r=>r[0]===m),mt=mr.filter(r=>r[1]==='DESCARGADO').length,wc=mr.filter(r=>r[7]!=null&&r[8]!=null),b=wc.filter(r=>(r[2]==='A TIEMPO'||r[2]==='ANTICIPADO')&&r[8]>=r[7]).length;return mt>0?Math.round(b/mt*100):0});
-const otL=MS.map(m=>{const mr=D.r.filter(r=>r[0]===m&&r[1]==='DESCARGADO');return mr.length>0?Math.round(mr.filter(r=>r[2]==='A TIEMPO'||r[2]==='ANTICIPADO').length/mr.length*100):0});
-const ifL=MS.map(m=>{const mr=D.r.filter(r=>r[0]===m),wc=mr.filter(r=>r[7]!=null&&r[8]!=null);return wc.length>0?Math.round(wc.filter(r=>r[8]>=r[7]).length/wc.length*100):0});
-mc('g5',{type:'bar',data:{labels:MS.map(m=>({Ene:'Enero',Feb:'Febrero',Mar:'Marzo',Abr:'Abril'}[m])),datasets:[{label:'On Time %',data:otL,backgroundColor:'rgba(16,185,129,.65)',borderRadius:6},{label:'In Full %',data:ifL,backgroundColor:'rgba(6,182,212,.65)',borderRadius:6},{label:'OTIF%',data:oL,type:'line',borderColor:'#f59e0b',backgroundColor:'transparent',pointRadius:5,pointBackgroundColor:'#f59e0b',borderWidth:2,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{padding:12,usePointStyle:true,pointStyle:'circle',font:{size:11}}},tooltip:{...TT,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y+'%'}}},scales:{y:{beginAtZero:true,max:100,grid:GG,ticks:{callback:v=>v+'%'}},x:{grid:NN}}}});
+// OTIF chart - filtered months
+const oL=aMs.map(m=>{const mr=reg.filter(r=>r[0]===m),mt=mr.filter(r=>r[1]==='DESCARGADO').length,wc=mr.filter(r=>r[7]!=null&&r[8]!=null),b=wc.filter(r=>(r[2]==='A TIEMPO'||r[2]==='ANTICIPADO')&&r[8]>=r[7]).length;return mt>0?Math.round(b/mt*100):0});
+const otL=aMs.map(m=>{const mr=reg.filter(r=>r[0]===m&&r[1]==='DESCARGADO');return mr.length>0?Math.round(mr.filter(r=>r[2]==='A TIEMPO'||r[2]==='ANTICIPADO').length/mr.length*100):0});
+const ifL=aMs.map(m=>{const mr=reg.filter(r=>r[0]===m),wc=mr.filter(r=>r[7]!=null&&r[8]!=null);return wc.length>0?Math.round(wc.filter(r=>r[8]>=r[7]).length/wc.length*100):0});
+mc('g5',{type:'bar',data:{labels:aMs.map(m=>MN[m]),datasets:[{label:'On Time %',data:otL,backgroundColor:'rgba(16,185,129,.65)',borderRadius:6},{label:'In Full %',data:ifL,backgroundColor:'rgba(6,182,212,.65)',borderRadius:6},{label:'OTIF%',data:oL,type:'line',borderColor:'#f59e0b',backgroundColor:'transparent',pointRadius:5,pointBackgroundColor:'#f59e0b',borderWidth:2,tension:.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{padding:12,usePointStyle:true,pointStyle:'circle',font:{size:11}}},tooltip:{...TT,callbacks:{label:c=>c.dataset.label+': '+c.parsed.y+'%'}}},scales:{y:{beginAtZero:true,max:100,grid:GG,ticks:{callback:v=>v+'%'}},x:{grid:NN}}}});
 
 const dm={};reg.forEach(r=>{if(r[3]&&r[3]!=='SIN DEMORA'&&r[3]!=='')dm[r[3]]=(dm[r[3]]||0)+1});
 mc('g6',{type:'bar',data:{labels:Object.keys(dm).length?Object.keys(dm):['Sin demoras'],datasets:[{data:Object.keys(dm).length?Object.values(dm):[0],backgroundColor:CC.slice(3),borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:TT},scales:{x:{beginAtZero:true,grid:GG},y:{grid:NN}}}});
 
-// TONELADAS POR UNIDAD
 const tnS=Object.entries(tnU).sort((a,b)=>b[1]-a[1]);
 mc('g7',{type:'bar',data:{labels:tnS.map(e=>e[0]),datasets:[{label:'TN',data:tnS.map(e=>Math.round(e[1]*10)/10),backgroundColor:tnS.map((_,i)=>CC[i%CC.length]),borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>c.parsed.x.toFixed(1)+' TN'}}},scales:{x:{beginAtZero:true,grid:GG,ticks:{callback:v=>v+' TN'}},y:{grid:NN,ticks:{font:{size:11,weight:'bold'}}}}}});
 
-// PROG
-const pr=fP(D.p),pTo=pr.length,pE=pr.filter(r=>r.e==='EJECUTADO').length,pN2=pr.filter(r=>r.e==='NO EJECUTADO').length;
+// PROG - filtered
+const pr=fPr,pTo=pr.length,pE=pr.filter(r=>r.e==='EJECUTADO').length,pN2=pr.filter(r=>r.e==='NO EJECUTADO').length;
 const pp=pr.filter(r=>r.es==='PROGRAMADO'||r.e==='NO EJECUTADO');
 kp('kP',[['Programados',pTo,'blue','Viajes'],['Ejecutados',pE,'green','Completados'],['No Ejecutados',pN2,'red','Sin completar'],['Pendientes',pp.length,'orange','Por ejecutar'],['% Ejecución',(pTo>0?Math.round(pE/pTo*1000)/10:0)+'%','purple','Ejec/Total']]);
 document.getElementById('pN').textContent='('+pp.length+' pendientes)';
-mc('p1',{type:'bar',data:{labels:MS.map(m=>({Ene:'Enero',Feb:'Febrero',Mar:'Marzo',Abr:'Abril'}[m])),datasets:[{data:MS.map(m=>D.p.filter(r=>r.m===m).length),backgroundColor:'rgba(99,102,241,.7)',borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:TT},scales:{y:{beginAtZero:true,grid:GG},x:{grid:NN}}}});
+const pMs=[...new Set(fPr.map(r=>r.m).filter(Boolean))];const aPMs=MS.filter(m=>pMs.includes(m));
+mc('p1',{type:'bar',data:{labels:aPMs.map(m=>MN[m]),datasets:[{data:aPMs.map(m=>fPr.filter(r=>r.m===m).length),backgroundColor:'rgba(99,102,241,.7)',borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:TT},scales:{y:{beginAtZero:true,grid:GG},x:{grid:NN}}}});
 mc('p2',{type:'doughnut',data:{labels:['Ejecutados','No Ejecutados'],datasets:[{data:[pE,pN2],backgroundColor:['#10b981','#ef4444'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{padding:16,usePointStyle:true,pointStyle:'circle'}},tooltip:TT}}});
 document.getElementById('pTB').innerHTML=pp.map(r=>'<tr><td>'+r.c+'</td><td class="mo">'+r.t+'</td><td>'+r.cl.substring(0,35)+'</td><td>'+r.o+'</td><td>'+r.d+'</td><td>'+r.fs+'</td><td class="mo" style="color:var(--a)">'+r.ir+'</td><td><span class="pl pl-y">'+r.e+'</span></td></tr>').join('');
 
-// COSTOS
-const cx=fCo(D.c),xT=cx.reduce((s,r)=>s+r[2],0),xD=cx.filter(r=>r[1]==='DESCARGADO').length,xR=cx.filter(r=>r[1]==='EN RUTA').length;
+// COSTOS - filtered
+const cx=co,xT=cTot,xD=cx.filter(r=>r[1]==='DESCARGADO').length,xR=cx.filter(r=>r[1]==='EN RUTA').length;
 const tr=fTr(D.t),tT=tr.reduce((s,r)=>s+r[0],0);
 const totalGeneral=xT+tT;
 kp('kC',[
@@ -241,9 +254,9 @@ kp('kC',[
   ['Total General (Fact + Trasl)','S/. '+totalGeneral.toLocaleString('es-PE',{maximumFractionDigits:0}),'cyan','<b class="b">Facturado</b> + <b class="g">Internos</b>'],
   ['Completados / En Ruta',xD+' / '+xR,'orange','Descargados vs en tránsito']
 ]);
-
-const mC={};cx.forEach(r=>{mC[r[3]]=(mC[r[3]]||0)+r[2]});const mL=MS.filter(m=>mC[m]);
-mc('c1',{type:'bar',data:{labels:mL.length?mL:['—'],datasets:[{data:mL.length?mL.map(m=>Math.round(mC[m])):[0],backgroundColor:'rgba(59,130,246,.7)',borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>'S/. '+c.parsed.y.toLocaleString('es-PE')}}},scales:{y:{beginAtZero:true,grid:GG,ticks:{callback:v=>'S/.'+(v/1000).toFixed(0)+'K'}},x:{grid:NN}}}});
+const cMs=[...new Set(cx.map(r=>r[3]).filter(Boolean))];const aCMs=MS.filter(m=>cMs.includes(m));
+const mC={};cx.forEach(r=>{mC[r[3]]=(mC[r[3]]||0)+r[2]});
+mc('c1',{type:'bar',data:{labels:aCMs.length?aCMs.map(m=>MN[m]):['—'],datasets:[{data:aCMs.length?aCMs.map(m=>Math.round(mC[m])):[0],backgroundColor:'rgba(59,130,246,.7)',borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>'S/. '+c.parsed.y.toLocaleString('es-PE')}}},scales:{y:{beginAtZero:true,grid:GG,ticks:{callback:v=>'S/.'+(v/1000).toFixed(0)+'K'}},x:{grid:NN}}}});
 
 const cCl={};cx.forEach(r=>{let k=r[4];if(k.length>30)k=k.substring(0,30)+'...';cCl[k]=(cCl[k]||0)+r[2]});
 mc('c2',{type:'bar',data:{labels:Object.entries(cCl).sort((a,b)=>b[1]-a[1]).slice(0,8).map(e=>e[0]),datasets:[{data:Object.entries(cCl).sort((a,b)=>b[1]-a[1]).slice(0,8).map(e=>Math.round(e[1])),backgroundColor:'rgba(6,182,212,.6)',borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>'S/. '+c.parsed.x.toLocaleString('es-PE')}}},scales:{x:{beginAtZero:true,grid:GG,ticks:{callback:v=>'S/.'+(v/1000).toFixed(0)+'K'}},y:{grid:NN,ticks:{font:{size:9}}}}}});
@@ -253,8 +266,9 @@ mc('c3',{type:'bar',data:{labels:Object.entries(cU).sort((a,b)=>b[1]-a[1]).map(e
 
 mc('c4',{type:'doughnut',data:{labels:['Descargado','En Ruta'],datasets:[{data:[xD,xR],backgroundColor:['#10b981','#f59e0b'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{padding:12,usePointStyle:true,pointStyle:'circle'}},tooltip:TT}}});
 
-const tC={};tr.forEach(r=>{tC[r[1]]=(tC[r[1]]||0)+r[0]});const tL=MS.filter(m=>tC[m]);
-mc('c5',{type:'bar',data:{labels:tL.length?tL:['—'],datasets:[{data:tL.length?tL.map(m=>Math.round(tC[m])):[0],backgroundColor:'rgba(99,102,241,.7)',borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>'S/. '+c.parsed.y.toLocaleString('es-PE')}}},scales:{y:{beginAtZero:true,grid:GG,ticks:{callback:v=>'S/.'+(v/1000).toFixed(0)+'K'}},x:{grid:NN}}}});
+const tMs=[...new Set(tr.map(r=>r[1]).filter(Boolean))];const aTMs=MS.filter(m=>tMs.includes(m));
+const tC={};tr.forEach(r=>{tC[r[1]]=(tC[r[1]]||0)+r[0]});
+mc('c5',{type:'bar',data:{labels:aTMs.length?aTMs.map(m=>MN[m]):['—'],datasets:[{data:aTMs.length?aTMs.map(m=>Math.round(tC[m])):[0],backgroundColor:'rgba(99,102,241,.7)',borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{...TT,callbacks:{label:c=>'S/. '+c.parsed.y.toLocaleString('es-PE')}}},scales:{y:{beginAtZero:true,grid:GG,ticks:{callback:v=>'S/.'+(v/1000).toFixed(0)+'K'}},x:{grid:NN}}}});
 }
 R();
 </script>
